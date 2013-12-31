@@ -170,6 +170,31 @@ Since all sets will have the same number of groups in them, we can simply sum th
 Unless instructed not to, Lunch Roulette will generate a new CSV in `data/output` each time it is run. The filenames are unique and based off MD5 hases of the people in each group of the set. If specified, Lunch Roulette will output the top N results and/or the bottom N results. This is useful for testing its efficacy: if the bottom sets don't seem as diverse as the top sets, then you know its working!
 
 Lunch Roulette will also output a new staff CSV (prefixed `staff_` in `data/output`) complete with new lunch IDs per-staff so that the next time it is run, it will avoid generating similar lunch groups. It is recommended that you overwrite data/staff.csv with whatever version you end up going with.
+
+## Sample Output ##
+
+Using the --verbose flag, Lunch Roulette will output its top lunch set to your console:
+
+    {15:55}[1.9.3-p327]~/lunch_roulette:master ✗ ➭ ruby lib/lunch_roulette.rb data/staff.csv --verbose -d -i 1000
+
+    Generating 1000 sets...
+    Invalid Sets: 831
+    Valid Sets: 169
+    Top Set Candidate: 1
+    Group 1: Mauricio Javis (Customer Service), Elizabeth Diaz (Communications), Damion Gibala (Engineering), Margeret Sofer (Engineering - Mobile)
+      Average Score: 0.0989
+      Score Breakdown:{"floor"=>0.0125, "days_here"=>0.07331633521199155, "team"=>0.30335622624235026, "specialty"=>0.00625}
+
+    Group 2: Lincoln Kruiboesch (Communications), Loyd Donofrio (Outreach - Backend), Ramiro Buckmeon (Executive), Orlando Horgan (Communications - Mobile)
+      Average Score: 0.1264
+      Score Breakdown:{"floor"=>0.0125, "days_here"=>0.03940092295338359, "team"=>0.4259401366389413, "specialty"=>0.027716947282604317}
+
+    Group 3: Leandro Mittlestadt (Communications), Terese Delung (Design - Mobile), Ina Larde (Product Manager), Carolina Credo (Communications), Susan Young (Customer Service), David Graham (Product Manager - Backend)
+      Average Score: 0.0701
+      Score Breakdown:{"floor"=>0.026220221204253793, "days_here"=>0.08282110480420304, "team"=>0.14939879517586482, "specialty"=>0.022008521077073764}
+
+    ...
+
 # Tips
 
 * Depending on your staff and the validations you choose to enforce, Lunch Roulette may generate only a couple dozen valid sets, so if you are getting poor results, consider relaxing (commenting out) some of the validations in `LunchSet`'s `valid_set?`
