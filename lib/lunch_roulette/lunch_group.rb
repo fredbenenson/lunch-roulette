@@ -9,7 +9,7 @@ class LunchRoulette
       @scores = Hash.new
       # Calculate the average diversity across all features for all members.
       # Since some groups will have 1 or 2 more people than others, we can't use sum
-      @average_score = calculate_group_score.values.mean
+      @average_score = calculate_group_score.values.sum
       @valid = true
       @previous_lunches = {}
       find_previous_lunches
