@@ -1,0 +1,31 @@
+\\
+S = \text{set of staff}
+\\
+s = \text{A person on staff}
+\\
+\mathcal{U} = \text{All possible combinations of staff}
+\\
+\subset
+\\
+\mathcal{U}' = \text{A valid lunch set (a subset of permissable partitions of}\;\mathcal{U}\text{)}
+\\
+W = \text{Weights}
+\\
+\\
+\text{The quantization method that maps a feature (e.g. team) onto an integer}: f_i : S \rightarrow \mathbb Z
+\\
+\text{Weights for given features are given by}\;W\text{:} f_i = F_i \cdot W_i
+\\
+Diversity:
+\bigskip
+\max_{\substack{
+  \mathcal{G}\in\mathcal{U}'}}
+  \left(
+    \sum_{G\in\mathcal{G}}
+    \sum_{i=1}^{N}
+    \sigma
+      \left(
+        f_i(G)
+      \right)
+  \right)
+\\
