@@ -11,23 +11,7 @@ You may be asking why put so much effort into a tool whose end results could be 
 
 This task is surprisingly difficult, and particularly so when generating multiple sets of lunches over many weeks, and want lunch group choice to be dependent on more than mere randomness.
 
-Another reason genearting lunch groups is difficult is because you must do so without replacement: by removing one person from a lunch group, you have to put them in another group, and that group may not be ideal in terms of diversity or other reasons. While surmountable for a handful of people this issue becomes increasingly complex when handling many lunch groups across dozens of people over the course of many outings.
-
-Enter Lunch Roulette. This is the set of constraints the Lunch Roulette algorithm attempts to satisfy:
-
-* Lunch groups should be maximally diverse (e.g. though not necessary, it is ideal if all people in a group should be from a different team)
-* Be able to validate certain lunch sets (e.g. no set of lunches should ever be valid if two people with the same specialty should have lunch with each other, as chances are they see each other every day)
-* Respect past lunches (e.g. if Fred, Lincoln and Sherry all had lunch together a week ago, they shouldn't ever have lunch together again)
-* Have configurable mappings (e.g. the Product Management team is "close" to the Product Engineering team, so lunches between them should be discouraged)
-* Use weights so that some things about people are more important than others when determining diversity (e.g. team matters a lot, seniority less so)
-* Output to CSV files and console and provide visibility into each group's score
-
-# How
-Lunch Roulette creates a set of lunches containing all staff, where each group is maximally diverse given the staff's specialty, their department, and their seniority.
-
-It does this thousands of times, and then ranks sets by their overall diversity: the set of lunch groups with highest total diversity wins.
-
-For more insight into how Lunch Roulette calculates diversity per group, see the `calculate_group_score` in the `LunchGroup` class, or the Calculating Diversity section below.
+For more about this project, read this: TKTKTK
 
 # Usage #
 Lunch Roulette always requires a CSV file with staff features:
@@ -60,14 +44,6 @@ A sample staff dataset is provided in `data/staff.csv` (thanks to Namey for the 
     9,Mauricio Javis,08/25/2009,1,Customer Service,,"12,11"
     10,Maria Givhan,09/18/2011,3,Outreach,Backend,"11,9"
 
-The use of a CSV input as opposed to a database is to facilitate easy editing in a spreedsheet application (a shared Google Doc is recommended) without the need for migrations or further application bloat. This allows non-engineers to add new staff, collaborate, and add new columns if needed.
-
-Accordingly, the date format of MM/DD/YYYY is specific to common spreadsheet programs like Google Docs and Excel.
-
-The `previous_lunches` column contains a double quoted comma-delimited list of previous lunches each having their own ID. If no previous lunches have taken place, then ids will be generated automatically (see the *Output* section below for more info).
-
-Currently, `user_id` isn't for anything inside Lunch Roulette, but it may be useful to keep track of staff with similar names and/or tie into an application.
-
 ## Configuration ##
 ### Mappings ###
 At the minimum, Lunch Roulette needs to know how different individual features are from each other. This is achieved by hardcoding a one dimensional mapping in `config/mappings_and_weights.yml`:
@@ -89,8 +65,6 @@ At the minimum, Lunch Roulette needs to know how different individual features a
       Finance: 0
       Legal: 40
 
-Lunch Roulette expects, though doesn't need, all employees to have a team (Customer Service, Design, etc.), and some employees to have a specialty (Data, Legal), etc.
-
 ### Weights ###
 You should also specify the weights of each feature as a real value. This allows Lunch Roulette to weight some features as being more important than others when calculating lunch group diversity. In the supplied configuration, team is weighted as 0.9, and is therefore the most important factor in determining whether a lunch group is diverse.
 
@@ -110,98 +84,15 @@ When the number of total staff is not wholly divisible by this number, Lunch Rou
 
 For example, if a staff was comprised of 21 people, and the mimimum group size was 4, Lunch Roulette would create four groups of four people, and one group of five people.
 
-### Determining Mappings
-The weights that Lunch Roulette uses to calculate team diversity are specified in the `config/weights_and_mappings.yml` file.
-
-Team and specialty mappings effectively work as quantizers in the `Person` class, and if you add new features, you'll have to modify it accordingly.
-
-For example, Customer Service may be culturally "closer" to the Communications team than the Engineering team. It is **highly** recommended that you tweak the above mappings to your individual use. Remember, the more you define similarity between teams and specialties the easier it is for Lunch Roulette to diversify your lunch groups.
-
-Seniority is calculated by subtracting the day the employee started from today, so staff that start earliest have the highest seniority.
-
-Not all staff are required to have values for all features. In particular, if each staff has a specialty, Lunch Roulette may have a difficult time creating valid lunch sets, so its recommended that no more than 30-40% have specialties.
-
-## Previous Lunches & Validations ##
-Before Lunch Roulette calculates a lunch group's diversity, the `LunchSet` class attempts to create a set of lunches that pass the validations specified in the class method `valid_set?`. For a staff of 48 people with a minimum group size of 4, a set would contain a dozen group lunches.
-
-Out of the box, there are three validations Lunch Roulette requires for a set to be considered valid:
-
-* The set cannot contain any group where 3 or more people have had lunch before
-* The set cannot contain more than on executive (a dummy previous lunch with the id of 0 is used here)
-* The set cannot contain anyone with the same specialty (remember, specialties are different than teams)
-
-In most scenarios with at least one or two previous lunches, it is impossible to create a valid lunch set without at least one group having one pair of people who have had lunch before.
-
-# Calculating Diversity #
-Diversity is first within groups, and then across sets. The set with the highest diversity wins.
-
-## Group Diversity ##
-Once a valid lunch set is created Lunch Roulette determines the diversity of each group within the set thusly:
-
-  1. Choose a feature
-  2. Choose a person
-  3. Normalize the value of that person's quantized feature value against the maximum of the entire staff
-
-    **Example:** if Fred has been at the company 100 days, and the max anyone has been there is 400, his normalized seniority value is 0.25
-
-  4. Do this for all people in the current group
-  5. Find the standard deviation of these values
-
-    **Example:** For values of 0.25, 0.125, 0.1, 0.9999, the standard deviation would be 0.4258687
-
-  6. Multiply this value by the configured weight
-
-    **Example:** 0.4258687 * 0.2, where 0.2 is the given weight for seniority
-
-  7. Repeat this process for all features
-  8. The group score is the average of these numbers (e.g. the product of the standard deviation of the features and the configured weight per feature)
-
-The resulting average is a representation of the how different each member of a given group is from each other across all features and can be seen in the verbose output:
-
-    Average Score: 0.1313
-      Score Breakdown: {"floor"=>0.023935677693908454, "days_here"=>0.07567297816690133, "team"=>0.3773923687622737, "specialty"=>0.04827762594273528}
-
-The higher the average, the more diverse the group.
-
-## Set Diversity ##
-Since all sets will have the same number of groups in them, we can simply sum the average scores across all the groups and arrive at a per-set score. This represents the average diversity across all groups within a set and is used to compare sets to each other.
-
 # Output #
 Unless instructed not to, Lunch Roulette will generate a new CSV in `data/output` each time it is run. The filenames are unique and based off MD5 hases of the people in each group of the set. If specified, Lunch Roulette will output the top N results and/or the bottom N results. This is useful for testing its efficacy: if the bottom sets don't seem as diverse as the top sets, then you know its working!
 
 Lunch Roulette will also output a new staff CSV (prefixed `staff_` in `data/output`) complete with new lunch IDs per-staff so that the next time it is run, it will avoid generating similar lunch groups. It is recommended that you overwrite data/staff.csv with whatever version you end up going with.
 
-## Sample Output ##
-
-Using the --verbose flag, Lunch Roulette will output its top lunch set to your console:
-
-    {15:55}[1.9.3-p327]~/lunch_roulette:master ✗ ➭ ruby lib/lunch_roulette.rb data/staff.csv --verbose -d -i 1000
-
-    Generating 1000 sets...
-    Invalid Sets: 831
-    Valid Sets: 169
-    Top Set Candidate: 1
-    Group 1: Mauricio Javis (Customer Service), Elizabeth Diaz (Communications), Damion Gibala (Engineering), Margeret Sofer (Engineering - Mobile)
-      Average Score: 0.0989
-      Score Breakdown:{"floor"=>0.0125, "days_here"=>0.07331633521199155, "team"=>0.30335622624235026, "specialty"=>0.00625}
-
-    Group 2: Lincoln Kruiboesch (Communications), Loyd Donofrio (Outreach - Backend), Ramiro Buckmeon (Executive), Orlando Horgan (Communications - Mobile)
-      Average Score: 0.1264
-      Score Breakdown:{"floor"=>0.0125, "days_here"=>0.03940092295338359, "team"=>0.4259401366389413, "specialty"=>0.027716947282604317}
-
-    Group 3: Leandro Mittlestadt (Communications), Terese Delung (Design - Mobile), Ina Larde (Product Manager), Carolina Credo (Communications), Susan Young (Customer Service), David Graham (Product Manager - Backend)
-      Average Score: 0.0701
-      Score Breakdown:{"floor"=>0.026220221204253793, "days_here"=>0.08282110480420304, "team"=>0.14939879517586482, "specialty"=>0.022008521077073764}
-
-    ...
-
 # Tips
 
 * Depending on your staff and the validations you choose to enforce, Lunch Roulette may generate only a couple dozen valid sets, so if you are getting poor results, consider relaxing (commenting out) some of the validations in `LunchSet`'s `valid_set?`
 * Have some time? Try 100,000 iterations!
-
-# Caveats #
-The math Lunch Roulette is using is fundamentally pretty simple, and I am sure there are better ways for generating such diversity.
 
 # TODO #
 * Tests
