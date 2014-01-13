@@ -20,7 +20,7 @@ class LunchRoulette
             csv << ['score', *config.match_thresholds]
             set.groups.each.with_index do |group, group_index|
               s = config.match_thresholds.map{|m| group.previous_lunches[m].to_a.join("\t") }
-              o = "Group #{group_index + 1}: #{group.inspect}\n\tAverage Score: #{group.average_score.round(4)}\n\tScore Breakdown:#{group.scores}\n\n"
+              o = "Group #{group_index + 1}: #{group.inspect}\n\tSum Score: #{group.average_score.round(4)}\n\tScore Breakdown:#{group.scores}\n\n"
               puts o if config.options[:verbose_output]
               csv << [group.average_score, *s, group.inspect].flatten
             end

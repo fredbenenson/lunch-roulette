@@ -60,7 +60,7 @@ class LunchRoulette
     i = 0.0
     invalid_sets = 0
     if config.options[:verbose_output]
-      puts "Generating #{config.options[:ITERATIONS]} sets..."
+      puts "Generating #{iterations} sets..."
     end
     iterations.times do
       print "#{((i/iterations)*100).round(4)}% Done\r"
