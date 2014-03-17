@@ -9,14 +9,14 @@
     Engineering: 90
     Executive: 150
   specialty_mappings:
-    Backend: -20
-    Data: -10
-    Frontend: -15
-    Mobile: 5
-    Finance: 0
-    Legal: 40
+    Backend: 0
+    Data: 20
+    Frontend: 30
+    Mobile: 50
+    Finance: 100
+    Legal: 120
   weights:
-    floor: 0.1
+    table: 0.6
     days_here: 0.2
     team: 0.9
     specialty: 0.1

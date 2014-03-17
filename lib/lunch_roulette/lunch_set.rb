@@ -7,7 +7,7 @@ class LunchRoulette
       # Shuffle our incoming people:
       @lunchers = staff.shuffle
       @groups = generate_groups
-      @score = @groups.map{|g| g.average_score }.sum
+      @score = @groups.map{|g| g.sum_score }.sum
       @previous_lunches = {}
       previous_lunch_stats
       @valid = valid_set?

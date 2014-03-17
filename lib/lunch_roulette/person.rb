@@ -1,16 +1,17 @@
 class LunchRoulette
   class Person
-    attr_accessor :name, :previous_lunches, :features, :team, :specialty, :user_id, :start_date, :floor
+    attr_accessor :name, :previous_lunches, :features, :team, :specialty, :user_id, :start_date, :table, :email
     def initialize(hash)
       @features = {}
       @team = hash['team']
       @user_id = hash['user_id']
+      @email = hash['email']
       @specialty = hash['specialty']
       @start_date = hash['start_date']
       @features['days_here'] = (Date.today - Date.strptime(@start_date, '%m/%d/%Y')).to_i
       @features['team'] = config.team_mappings[@team].to_i
       @features['specialty'] = config.specialty_mappings[@specialty].to_i
-      @features['floor'] = @floor = hash['floor'].to_i
+      @features['table'] = @table = hash['table'].to_i
       @name = hash['name']
       @previous_lunches = []
       if hash['previous_lunches']
@@ -25,12 +26,12 @@ class LunchRoulette
     end
 
     def inspect
-      s = ""
+      s = "(Table #{@table}, "
       s += @name
       if @specialty
-        s += " (#{@team} - #{@specialty})"
+        s += ": #{@team} - #{@specialty})"
       else
-        s += " (#{@team})"
+        s += ": #{@team})"
       end
       s
     end

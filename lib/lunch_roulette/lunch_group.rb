@@ -1,7 +1,7 @@
 class LunchRoulette
   class LunchGroup
 
-    attr_accessor :people, :average_score, :valid, :previous_lunches, :scores, :id
+    attr_accessor :people, :sum_score, :valid, :previous_lunches, :scores, :id
 
     def initialize(chosen_people = [])
       @config = config
@@ -9,7 +9,7 @@ class LunchRoulette
       @scores = Hash.new
       # Calculate the average diversity across all features for all members.
       # Since some groups will have 1 or 2 more people than others, we can't use sum
-      @average_score = calculate_group_score.values.sum
+      @sum_score = calculate_group_score.values.sum
       @valid = true
       @previous_lunches = {}
       find_previous_lunches
@@ -21,6 +21,10 @@ class LunchRoulette
 
     def inspect
       @people.map{|p| p.inspect }.join(", ")
+    end
+
+    def emails
+      @people.map{|p| p.email }.join(", ")
     end
 
     protected
