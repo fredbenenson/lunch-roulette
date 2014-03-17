@@ -26,13 +26,13 @@ class LunchRoulette
     end
 
     def inspect
-      s = "(Table #{@table}, "
-      s += @name
+      s = @name
       if @specialty
-        s += ": #{@team} - #{@specialty})"
+        s += " (#{@team} - #{@specialty}"
       else
-        s += ": #{@team})"
+        s += " (#{@team}"
       end
+      s += ", Table #{@table})"
       s
     end
 
