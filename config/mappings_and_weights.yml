@@ -1,13 +1,15 @@
 ---
   team_mappings:
     Customer Service: 0
-    Communications: 5
+    Community: 5
     Outreach: 15
+    Marketing: 20
+    Communications: 25
     Operations: 30
-    Product Manager: 40
+    Product: 40
     Design: 60
     Engineering: 90
-    Executive: 150
+    Data: 100
   specialty_mappings:
     Backend: 0
     Data: 20
@@ -20,4 +22,4 @@
     days_here: 0.2
     team: 0.9
     specialty: 0.1
-  min_lunch_group_size: 4
+  min_lunch_group_size: 5

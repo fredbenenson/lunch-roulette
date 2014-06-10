@@ -24,8 +24,8 @@ class LunchRoulette
 
     o = OptionParser.new do |o|
       o.banner = "Usage: ruby lunch_roulette_generator.rb staff.csv [OPTIONS]"
-      o.on('-n', '--min-group-size N', 'Minimum Lunch Group Size (default 4)') {|n| options[:MIN_LUNCH_GROUP_SIZE] = n.to_i }
-      o.on('-i', '--iterations I', 'Number of Iterations (default 1,000)') {|i| options[:ITERATIONS] = i.to_i }
+      o.on('-n', '--min-group-size N', 'Minimum Lunch Group Size (default 4)') {|n| options[:min_lunch_group_size] = n.to_i }
+      o.on('-i', '--iterations I', 'Number of Iterations (default 1,000)') {|i| options[:iterations] = i.to_i }
       o.on('-m', '--most-diverse-sets M', 'Number of most diverse sets to generate (default 1)') {|i| options[:most_diverse_sets] = i.to_i }
       o.on('-l', '--least-diverse-sets L', 'Number of least diverse sets to generate (default 0)') {|i| options[:least_diverse_sets] = i.to_i }
       o.on('-v', '--verbose', 'Verbose output') { options[:verbose_output] = true }
@@ -56,11 +56,11 @@ class LunchRoulette
   def spin!
     compile_staff
     candidates = Set.new
-    iterations = config.options[:ITERATIONS] || 1_000
+    iterations = config.options[:iterations] || 1_000
     i = 0.0
     invalid_sets = 0
     if config.options[:verbose_output]
-      puts "Generating #{config.options[:ITERATIONS]} sets..."
+      puts "Generating #{config.options[:iterations]} sets..."
     end
     iterations.times do
       print "#{((i/iterations)*100).round(4)}% Done\r"

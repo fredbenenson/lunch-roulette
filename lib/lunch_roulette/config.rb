@@ -12,7 +12,7 @@ class LunchRoulette
     end
 
     def self.min_lunch_group_size
-      @@config['min_lunch_group_size']
+      @@options[:min_lunch_group_size] || @@config['min_lunch_group_size']
     end
 
     def self.match_thresholds

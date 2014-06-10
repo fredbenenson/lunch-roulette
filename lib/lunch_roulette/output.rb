@@ -20,7 +20,7 @@ class LunchRoulette
             csv << ['score', *config.match_thresholds]
             set.groups.each.with_index do |group, group_index|
               s = config.match_thresholds.map{|m| group.previous_lunches[m].to_a.join("\t") }
-              o = "Group #{group_index + 1}: "
+              o = "Group #{group_index + 1} of #{group.people.size}: "
               o << group.inspect
               o << "\n\tEmails: #{group.emails}"
               o << "\n\tSum Score: #{group.sum_score.round(4)}"
