@@ -1,4 +1,4 @@
-user_id,name,start_date,floor,team,specialty,previous_lunches
+user_id,name,start_date,table,team,specialty,previous_lunches
 1,Lincoln Kruiboesch,06/18/2012,2,Communications,,"12,7"
 2,Sherill Assaf,09/10/2011,3,Product Manager,,"1,9"
 3,Don Greep,03/23/2013,1,Customer Service,,"6,3"
