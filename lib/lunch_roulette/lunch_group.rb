@@ -7,7 +7,7 @@ class LunchRoulette
       @config = config
       @people = chosen_people
       @scores = Hash.new
-      # Calculate the average diversity across all features for all members.
+      # Calculate the average variance across all features for all members.
       # Since some groups will have 1 or 2 more people than others, we can't use sum
       @sum_score = calculate_group_score.values.sum
       @valid = true
@@ -31,9 +31,9 @@ class LunchRoulette
 
     def calculate_group_score
       # Scores are normalized to the maximum value of all staff, then we get the standard deviation
-      # This is later averaged across all the features of the group, so that groups with higher diversity
+      # This is later averaged across all the features of the group, so that groups with higher variance
       # will have a higher average. The averages of each group in a set is then summed to determine the
-      # overall diversity of the set.
+      # overall variance of the set.
       h = features.map do |feature|
         s = @people.map do |person|
           person.features[feature] / config.maxes[feature].to_f

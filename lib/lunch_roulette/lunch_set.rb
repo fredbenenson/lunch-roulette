@@ -62,9 +62,9 @@ class LunchRoulette
       @valid = true
 
       # Are there any groups that have 3 people who have had lunch previously?
-      # if @previous_lunches[3] > 0
-      #   @valid = false
-      # end
+      if @previous_lunches[3] > 0
+        @valid = false
+      end
 
       # Are two execs having lunch with each other? (Lunch 0 is the permanent exec lunch)
       groups.map do |group|

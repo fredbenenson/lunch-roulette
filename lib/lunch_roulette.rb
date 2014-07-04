@@ -20,14 +20,14 @@ class LunchRoulette
   def initialize(*args)
     LunchRoulette::Config.new
     options = Hash.new
-    options[:most_diverse_sets] = 1
+    options[:most_varied_sets] = 1
 
     o = OptionParser.new do |o|
       o.banner = "Usage: ruby lunch_roulette_generator.rb staff.csv [OPTIONS]"
       o.on('-n', '--min-group-size N', 'Minimum Lunch Group Size (default 4)') {|n| options[:min_lunch_group_size] = n.to_i }
       o.on('-i', '--iterations I', 'Number of Iterations (default 1,000)') {|i| options[:iterations] = i.to_i }
-      o.on('-m', '--most-diverse-sets M', 'Number of most diverse sets to generate (default 1)') {|i| options[:most_diverse_sets] = i.to_i }
-      o.on('-l', '--least-diverse-sets L', 'Number of least diverse sets to generate (default 0)') {|i| options[:least_diverse_sets] = i.to_i }
+      o.on('-m', '--most-varied-sets M', 'Number of most varied sets to generate (default 1)') {|i| options[:most_varied_sets] = i.to_i }
+      o.on('-l', '--least-varied-sets L', 'Number of least varied sets to generate (default 0)') {|i| options[:least_varied_sets] = i.to_i }
       o.on('-v', '--verbose', 'Verbose output') { options[:verbose_output] = true }
       o.on('-d', '--dont-write', "Don't write to files") { options[:dont_write] = true }
       o.on('-h', '--help', 'Print this help') { puts o; exit }
@@ -79,8 +79,8 @@ class LunchRoulette
     end
 
     @results = {
-      top: candidates.sort{|a,b| b.score <=> a.score }.first(config.options[:most_diverse_sets].to_i),
-      bottom: candidates.sort{|a,b| a.score <=> b.score }.first(config.options[:least_diverse_sets].to_i)
+      top: candidates.sort{|a,b| b.score <=> a.score }.first(config.options[:most_varied_sets].to_i),
+      bottom: candidates.sort{|a,b| a.score <=> b.score }.first(config.options[:least_varied_sets].to_i)
     }
   end
 
