@@ -1,15 +1,14 @@
 ---
   team_mappings:
-    Customer Service: 0
-    Community: 5
-    Outreach: 15
-    Marketing: 20
-    Communications: 25
-    Operations: 30
+    Community Service: 100
+    Community: 90
+    Marketing: 80
+    Communications: 70
+    Operations: 50
     Product: 40
-    Design: 60
-    Engineering: 90
-    Data: 100
+    Design: 30
+    Engineering: 20
+    Data: 0
   specialty_mappings:
     Backend: 0
     Data: 20
