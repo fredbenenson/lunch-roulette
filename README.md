@@ -31,8 +31,6 @@ So that you can run Lunch Roulette out of the box, I've provided a dummy staff (
 Configuring Lunch Roulete
 =========================
 
-# Mappings
-
 At the minimum, Lunch Roulette needs to know how different individual features are from each other. This is achieved by hardcoding a one dimensional mapping in `config/mappings_and_weights.yml`:
 
 ```
