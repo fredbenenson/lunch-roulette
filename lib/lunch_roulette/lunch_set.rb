@@ -35,16 +35,21 @@ class LunchRoulette
           @lunchers.size.times do
             # Randomly pick a group to put them in
             random_group = (rand groups.size)
-            groups[random_group] = LunchGroup.new([groups[random_group].people, @lunchers.pop].flatten)
+            groups[random_group] = LunchGroup.new([groups[random_group].people, pop_luncher].flatten)
           end
         else
           # If we do have enough people to create a new group
           # Pick our minimum number of people and throw them in a group
-          groups << LunchGroup.new(@lunchers.pop(config.min_lunch_group_size))
+
+          groups << LunchGroup.new(pop_luncher(config.min_lunch_group_size))
         end
       end
       groups.map.with_index{|g, i| g.id = config.maxes['lunch_id'].to_i + i + 1 }
       groups
+    end
+
+    def pop_luncher(n = 1)
+      @lunchers.pop(n).select{|l| l.lunchable }
     end
 
     # For each group, find how many people have had lunch with each other previously

@@ -1,8 +1,9 @@
 class LunchRoulette
   class Person
-    attr_accessor :name, :previous_lunches, :features, :team, :specialty, :user_id, :start_date, :table, :email
+    attr_accessor :name, :lunchable, :previous_lunches, :features, :team, :specialty, :user_id, :start_date, :table, :email
     def initialize(hash)
       @features = {}
+      @lunchable = hash['lunchable'] == "true"
       @team = hash['team']
       @user_id = hash['user_id']
       @email = hash['email']

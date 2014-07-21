@@ -1,6 +1,6 @@
 ---
   team_mappings:
-    Community Service: 100
+    Community Support: 100
     Community: 90
     Marketing: 80
     Communications: 70
@@ -17,8 +17,8 @@
     Finance: 100
     Legal: 120
   weights:
-    table: 0.6
+    table: 0.4
     days_here: 0.2
     team: 0.9
     specialty: 0.1
-  min_lunch_group_size: 4
+  min_lunch_group_size: 5

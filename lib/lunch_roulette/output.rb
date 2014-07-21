@@ -49,9 +49,9 @@ class LunchRoulette
         file = "data/output/staff_#{winning_set.score.round(4)}_#{winning_set.name}.csv"
       end
       CSV.open(file, "w") do |csv|
-        csv << %w(user_id email name start_date table team specialty previous_lunches)
+        csv << %w(user_id name email start_date table team specialty lunchable previous_lunches)
         staff.each do |luncher|
-          o = [ luncher.user_id, luncher.email, luncher.name, luncher.start_date, luncher.table, luncher.team, luncher.specialty, [luncher.previous_lunches, person_lunch_mappings[luncher.user_id]].flatten.join(",") ]
+          o = [ luncher.user_id, luncher.name, luncher.email, luncher.start_date, luncher.table, luncher.team, luncher.specialty, luncher.lunchable, [luncher.previous_lunches, person_lunch_mappings[luncher.user_id]].flatten.join(",") ]
           puts o.join("\t") if config.options[:verbose_output]
           csv << o
         end
