@@ -3,7 +3,7 @@ class LunchRoulette
     attr_accessor :name, :lunchable, :previous_lunches, :features, :team, :specialty, :user_id, :start_date, :table, :email
     def initialize(hash)
       @features = {}
-      @lunchable = hash['lunchable'] == "true"
+      @lunchable = %w(true TRUE).include? hash['lunchable']
       @team = hash['team']
       @user_id = hash['user_id']
       @email = hash['email']
