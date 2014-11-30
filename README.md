@@ -13,13 +13,13 @@ Along with specifying the various weights and mappings Lunch Roulette users, con
 
 ```
 Usage: ruby lunch_roulette_generator.rb staff.csv [OPTIONS]
-  -n, –min-group-size N           Minimum Lunch Group Size (default 4)
-  -i, –iterations I               Number of Iterations (default 1,000)
-  -m, –most-varied-sets M         Number of most varied sets to generate (default 1)
-  -l, –least-varied-sets L        Number of least varied sets to generate (default 0)
-  -v, –verbose                    Verbose output
-  -d, –dont-write                 Don't write to files
-  -h, –help                       Print this help
+  -n, --min-group-size N           Minimum Lunch Group Size (default 4)
+  -i, --iterations I               Number of Iterations (default 1,000)
+  -m, --most-varied-sets M         Number of most varied sets to generate (default 1)
+  -l, --least-varied-sets L        Number of least varied sets to generate (default 0)
+  -v, --verbose                    Verbose output
+  -d, --dont-write                 Don't write to files
+  -h, --help                       Print this help
 ```
 
 A Dummy Staff
