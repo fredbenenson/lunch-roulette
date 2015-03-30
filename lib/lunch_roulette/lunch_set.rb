@@ -7,7 +7,7 @@ class LunchRoulette
       # Shuffle our incoming people:
       @lunchers = staff.shuffle
       @groups = generate_groups
-      @score = @groups.map{|g| g.sum_score }.sum
+      @score = @groups.map{ |g| g.sum_score }.sum
       @previous_lunches = {}
       previous_lunch_stats
       @valid = valid_set?
@@ -27,29 +27,27 @@ class LunchRoulette
     end
 
     def generate_groups
+      lunchers = @lunchers.select{ |l| l.lunchable } # filter out The Unlunchables
       groups = []
-      until @lunchers.empty?
+      min_lunch_group_size = config.min_lunch_group_size
+      until lunchers.empty?
         # First check whether we have enough people to create a new group
-        if @lunchers.size < config.min_lunch_group_size
+        if lunchers.size < min_lunch_group_size
           # If we don't have enough people to do a new group
-          @lunchers.size.times do
+          lunchers.size.times do
             # Randomly pick a group to put them in
             random_group = (rand groups.size)
-            groups[random_group] = LunchGroup.new([groups[random_group].people, pop_luncher].flatten)
+            groups[random_group] = LunchGroup.new([groups[random_group].people, lunchers.pop].flatten)
           end
         else
           # If we do have enough people to create a new group
           # Pick our minimum number of people and throw them in a group
-
-          groups << LunchGroup.new(pop_luncher(config.min_lunch_group_size))
+          group = LunchGroup.new(lunchers.pop(min_lunch_group_size))
+          groups << group
         end
       end
       groups.map.with_index{|g, i| g.id = config.maxes['lunch_id'].to_i + i + 1 }
       groups
-    end
-
-    def pop_luncher(n = 1)
-      @lunchers.pop(n).select{|l| l.lunchable }
     end
 
     # For each group, find how many people have had lunch with each other previously
@@ -66,8 +64,10 @@ class LunchRoulette
     def valid_set?
       @valid = true
 
-      # Are there any groups that have 3 people who have had lunch previously?
-      if @previous_lunches[3] > 0
+      # Are there any groups that have i people who have had lunch previously?
+      i = [3, config.min_lunch_group_size].min
+
+      if @previous_lunches[i] > 0
         @valid = false
       end
 
