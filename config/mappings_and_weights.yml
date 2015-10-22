@@ -1,24 +1,26 @@
 ---
   team_mappings:
-    Community Support: 100
-    Community: 90
-    Marketing: 80
-    Communications: 70
-    Operations: 50
-    Product: 40
+    Engineering: 0
+    Data: 10
+    Product: 20
     Design: 30
-    Engineering: 20
-    Data: 0
+    Marketing: 40
+    Outreach: 50
+    Community Support: 60
+    Integrity: 70
+    Communications: 80
+    Operations: 90
+    Exec: 110
   specialty_mappings:
     Backend: 0
-    Data: 20
-    Frontend: 30
-    Mobile: 50
-    Finance: 100
-    Legal: 120
+    ST: 50
+    Frontend: 10
+    Mobile: 20
   weights:
     table: 0.4
     days_here: 0.2
     team: 0.9
     specialty: 0.1
   min_lunch_group_size: 5
+  min_group_score: 0.0001
+  time_decay_constant: 80.0

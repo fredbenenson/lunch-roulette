@@ -1,18 +1,22 @@
 class LunchRoulette
   class LunchGroup
 
-    attr_accessor :people, :sum_score, :valid, :previous_lunches, :scores, :id
+    attr_accessor :people, :score, :valid, :previous_lunches, :scores, :id
 
     def initialize(chosen_people = [])
       @config = config
       @people = chosen_people
-      @scores = Hash.new
-      # Calculate the average variance across all features for all members.
-      # Since some groups will have 1 or 2 more people than others, we can't use sum
-      @sum_score = calculate_group_score.values.sum
-      @valid = true
       @previous_lunches = {}
       find_previous_lunches
+      # Calculate the penalty factor for recent repeated subgroups
+      previous_lunches_factor = calculate_previous_lunches_factor
+      # Calculate the average variance across all features for all members.
+      # Since some groups will have 1 or 2 more people than others, we can't use sum
+      @scores = Hash.new
+      calculate_group_score
+      @score = previous_lunches_factor * scores.values.sum / people.size.to_f
+      @scores['previous_lunches_factor'] = previous_lunches_factor
+      @valid = true
     end
 
     def config
@@ -41,6 +45,19 @@ class LunchRoulette
         [feature, s * config.weights[feature]]
       end
       @scores = Hash[*h.flatten]
+    end
+
+    def calculate_previous_lunches_factor
+      factor = 1.0
+      max_lunch_id = @config.maxes['lunch_id'].to_i
+      return factor if @previous_lunches.nil?
+      @previous_lunches.each do |threshold, previous_lunches_above_threshold|
+        previous_lunches_above_threshold.each do |previous_lunch_id|
+          time = (max_lunch_id - previous_lunch_id).to_f
+          factor *= (1.0 - Math.exp(-1.0 * (time / config.time_decay_constant) ** 2))
+        end
+      end
+      factor
     end
 
     def features
