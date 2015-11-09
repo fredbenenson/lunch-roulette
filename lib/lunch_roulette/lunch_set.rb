@@ -7,7 +7,7 @@ class LunchRoulette
       # Shuffle our incoming people:
       @lunchers = staff.shuffle
       @groups = generate_groups
-      @score = @groups.map{ |g| g.sum_score }.sum
+      @score = @groups.map{ |g| g.score}.sum
       @previous_lunches = {}
       previous_lunch_stats
       @valid = valid_set?
@@ -63,23 +63,10 @@ class LunchRoulette
 
     def valid_set?
       @valid = true
-
-      # Are there any groups that have i people who have had lunch previously?
-      i = [3, config.min_lunch_group_size].min
-
-      if @previous_lunches[i] > 0
-        @valid = false
+      # Are there any groups that are individually too low-scoring to allow?
+      groups.each do |group|
+        @valid = false if group.score < config.min_group_score
       end
-
-      # Are two execs having lunch with each other? (Lunch 0 is the permanent exec lunch)
-      groups.map do |group|
-        group.previous_lunches.values.map do |previous_lunch|
-          if previous_lunch.to_a.flatten.include? 0
-            @valid = false
-          end
-        end
-      end
-
       # Are there any people with the same specialty in the same group?
       groups.map do |group|
         specialities = group.people.map{|person| person.specialty }.compact

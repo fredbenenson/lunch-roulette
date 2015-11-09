@@ -15,7 +15,7 @@ require 'lunch_roulette/output'
 
 class LunchRoulette
 
-  attr_reader :results, :staff
+  attr_reader :results, :staff, :all_valid_sets
 
   def initialize(*args)
     LunchRoulette::Config.new
@@ -30,6 +30,7 @@ class LunchRoulette
       o.on('-l', '--least-varied-sets L', 'Number of least varied sets to generate (default 0)') {|i| options[:least_varied_sets] = i.to_i }
       o.on('-v', '--verbose', 'Verbose output') { options[:verbose_output] = true }
       o.on('-d', '--dont-write', "Don't write to files") { options[:dont_write] = true }
+      o.on('-s', '--output-stats', "Output a csv of stats for all valid generated sets") { options[:output_stats] = true }
       o.on('-h', '--help', 'Print this help') { puts o; exit }
       o.parse!
     end
@@ -82,6 +83,7 @@ class LunchRoulette
       top: candidates.sort{|a,b| b.score <=> a.score }.first(config.options[:most_varied_sets].to_i),
       bottom: candidates.sort{|a,b| a.score <=> b.score }.first(config.options[:least_varied_sets].to_i)
     }
+    @all_valid_sets = candidates
   end
 
   protected
@@ -100,12 +102,12 @@ end
 l = LunchRoulette.new(ARGV)
 l.spin!
 
-o = LunchRoulette::Output.new(l.results)
+o = LunchRoulette::Output.new(l.results, l.all_valid_sets)
 o.get_results
+o.get_stats_csv if o.config.options[:output_stats]
 
 if l.results[:top].size > 0 || l.results[:bottom].size > 0
   o.get_new_staff_csv(l.staff)
 else
   puts "No valid sets generated, sorry."
 end
-

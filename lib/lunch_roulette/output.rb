@@ -1,8 +1,9 @@
 class LunchRoulette
   class Output
 
-    def initialize(results)
+    def initialize(results, all_valid_sets)
       @results = results
+      @all_valid_sets = all_valid_sets
     end
 
     def get_results
@@ -23,11 +24,11 @@ class LunchRoulette
               o = "Group #{group_index + 1} of #{group.people.size} people: "
               o << group.inspect
               o << "\n\tEmails: #{group.emails}"
-              o << "\n\tSum Score: #{group.sum_score.round(4)}"
+              o << "\n\tSum Score: #{group.score.round(4)}"
               o << "\n\tScore Breakdown:#{group.scores}"
               o << "\n\n"
               puts o if config.options[:verbose_output]
-              csv << [group.sum_score, *s, group.inspect].flatten
+              csv << [group.score, *s, group.inspect].flatten
             end
             o =  "Set #{set_index + 1} total score: #{set.score}, previous lunch matches: #{set.previous_lunch_stats.inspect}\n"
             puts "File written to: #{file}\n" unless config.options[:dont_write]
@@ -56,6 +57,41 @@ class LunchRoulette
           csv << o
         end
         puts "Staff file written to: #{file}\n" unless config.options[:dont_write]
+      end
+    end
+
+    def get_stats
+      puts "Getting stats for #{@all_valid_sets.length} valid sets\n" if config.options[:verbose_output]
+      stats = Hash.new
+      s = @all_valid_sets.map.with_index do |set, set_index|
+        h = LunchRoulette::Config.weights.keys.map do |feature|
+          sum = set.groups.map do |group|
+            group.scores[feature]
+          end.sum
+          [feature, sum]
+        end
+        h_hash = Hash[*h.flatten]
+        h_hash["score"] = set.score
+        h_hash["iterations"] = config.options[:iterations]
+        h_hash
+      end
+      s
+    end
+
+    def get_stats_csv
+      winning_set = @results[:top].first
+      stats = get_stats
+      if config.options[:dont_write]
+        file = "/dev/null"
+      else
+        file = "data/output/stats_#{winning_set.score.round(4)}_#{winning_set.name}.csv"
+      end
+      CSV.open(file, "w") do |csv|
+        csv << stats.first.keys
+        stats.each_with_index do |set, index|
+          csv << set.values
+        end
+        puts "Stats file written to: #{file}\n" unless config.options[:dont_write]
       end
     end
 
