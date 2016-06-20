@@ -74,6 +74,12 @@ class LunchRoulette
           @valid = false
         end
       end
+      # Are there any groups that have already been deemed invalid?
+      groups.each do |group|
+        if !group.valid
+          @valid = false
+        end
+      end
       @valid
     end
 

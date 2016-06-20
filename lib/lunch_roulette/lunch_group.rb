@@ -12,11 +12,16 @@ class LunchRoulette
       previous_lunches_factor = calculate_previous_lunches_factor
       # Calculate the average variance across all features for all members.
       # Since some groups will have 1 or 2 more people than others, we can't use sum
+      boss_factor = calculate_boss_factor
+      teammate_factor = calculate_teammate_factor
       @scores = Hash.new
       calculate_group_score
       @score = previous_lunches_factor * scores.values.sum / people.size.to_f
       @scores['previous_lunches_factor'] = previous_lunches_factor
       @valid = true
+      if boss_factor > 0 || teammate_factor > 2
+        @valid = false
+      end
     end
 
     def config
@@ -79,6 +84,72 @@ class LunchRoulette
         end
       end
     end
+
+    def calculate_boss_factor
+      @people.map(&:name).combination(2).to_a.reduce(0) do |sum, pair|
+        distance = 0
+        if compute_boss_distance(pair[0], pair[1]) == 1
+          distance = 1
+        end
+        sum + distance
+      end
+    end
+
+    def compute_boss_distance(person1, person2)
+      @children_hash ||= get_children(config.hierarchy)
+      distance = compute_descendent_distance(person1, person2, @children_hash)
+      distance > 0 ? distance : compute_descendent_distance(person2, person1, @children_hash)
+    end
+
+    def compute_descendent_distance(elder, younger, children_hash, depth = 1)
+      elder_children = children_hash[elder]
+      if elder_children.nil?
+        return 0
+      end
+      if elder_children.include? younger
+        return depth
+      end
+      distance = 0
+      elder_children.each do |child|
+        distance = compute_descendent_distance(child, younger, children_hash, depth + 1)
+        return distance if distance > 0
+      end
+      distance
+    end
+
+    def get_children(hierarchy, flat_hash = {})
+      hierarchy.each do |person, children|
+        flat_hash[person] = (children.nil? ? nil : children.keys)
+        flat_hash.merge!(get_children(children, flat_hash)) unless children.nil?
+      end
+      flat_hash
+    end
+
+    def calculate_teammate_factor
+      @people.map(&:name).combination(2).to_a.reduce(0) do |sum, pair|
+        siblings = 0
+        if are_siblings?(pair[0], pair[1])
+          siblings = 1
+        end
+        sum + siblings
+      end
+    end
+
+    def are_siblings?(person1, person2)
+      @parents_hash ||= get_parents(config.hierarchy)
+      @parents_hash[person1] == @parents_hash[person2]
+    end
+
+    def get_parents(hierarchy, flat_hash = {})
+      hierarchy.each do |parent, children|
+        unless children.nil?
+          children.keys.each {|child| flat_hash[child] = parent}
+          flat_hash.merge!(get_parents(children, flat_hash))
+        end
+      end
+      flat_hash
+    end
+
   end
 end
 

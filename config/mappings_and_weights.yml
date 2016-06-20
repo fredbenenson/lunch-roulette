@@ -17,10 +17,15 @@
     Frontend: 10
     Mobile: 20
   weights:
-    table: 0.4
+    #table: 0.4
     days_here: 0.2
     team: 0.9
     specialty: 0.1
   min_lunch_group_size: 5
   min_group_score: 0.0001
   time_decay_constant: 80.0
+  hierarchy:
+    Bossy McBossface:
+      Employee McEmployeeface:
+      Coworker McCoworkerface:
+    Intern:

@@ -59,5 +59,9 @@ class LunchRoulette
       @@options
     end
 
+    def self.hierarchy
+      @@config['hierarchy']
+    end
+
   end
 end
