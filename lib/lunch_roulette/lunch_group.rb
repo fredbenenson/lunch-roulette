@@ -24,16 +24,38 @@ class LunchRoulette
       end
     end
 
+    def initialize(people)
+      @people = people
+    end
+
     def config
       LunchRoulette::Config
     end
 
     def inspect
-      @people.map{|p| p.inspect }.join(", ")
+      @people.map(&:inspect).join(", ")
     end
 
     def emails
-      @people.map{|p| p.email }.join(", ")
+      @people.map(&:email).join(", ")
+    end
+
+    def valid?
+      score >= config.min_group_score && 
+        boss_factor == 0 && 
+        teammate_factor <= 2
+    end
+
+    def tenure_score
+    end
+
+    def team_score
+    end
+    
+    def manager_score
+    end
+
+    def previous_lunches_score
     end
 
     protected

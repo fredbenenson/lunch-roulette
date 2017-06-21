@@ -1,9 +1,9 @@
 class LunchRoulette
   class Output
 
-    def initialize(results, all_valid_sets)
+    def initialize(results)#, all_valid_sets)
       @results = results
-      @all_valid_sets = all_valid_sets
+      # @all_valid_sets = all_valid_sets
     end
 
     def get_results
@@ -60,23 +60,23 @@ class LunchRoulette
       end
     end
 
-    def get_stats
-      puts "Getting stats for #{@all_valid_sets.length} valid sets\n" if config.options[:verbose_output]
-      stats = Hash.new
-      s = @all_valid_sets.map.with_index do |set, set_index|
-        h = LunchRoulette::Config.weights.keys.map do |feature|
-          sum = set.groups.map do |group|
-            group.scores[feature]
-          end.sum
-          [feature, sum]
-        end
-        h_hash = Hash[*h.flatten]
-        h_hash["score"] = set.score
-        h_hash["iterations"] = config.options[:iterations]
-        h_hash
-      end
-      s
-    end
+    # def get_stats
+    #   puts "Getting stats for #{@all_valid_sets.length} valid sets\n" if config.options[:verbose_output]
+    #   stats = Hash.new
+    #   s = @all_valid_sets.map.with_index do |set, set_index|
+    #     h = LunchRoulette::Config.weights.keys.map do |feature|
+    #       sum = set.groups.map do |group|
+    #         group.scores[feature]
+    #       end.sum
+    #       [feature, sum]
+    #     end
+    #     h_hash = Hash[*h.flatten]
+    #     h_hash["score"] = set.score
+    #     h_hash["iterations"] = config.options[:iterations]
+    #     h_hash
+    #   end
+    #   s
+    # end
 
     def get_stats_csv
       winning_set = @results[:top].first
