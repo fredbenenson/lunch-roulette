@@ -1,30 +1,54 @@
 class LunchRoulette
+
   class Person
     # attr_accessor :name, :lunchable, :previous_lunches, :features, :team, :specialty, :user_id, :start_date, :table, :email
-    attr_accessor :name, :email, :start_date, :team, :manager, :lunchable_default, :lunchable_form, :lunchable_at, :previous_lunches
-    def initialize(name:, email:, start_date:, team:, manager: nil, lunchable_default: nil, lunchable_form: nil, lunchable_at: nil, previous_lunches: nil)
+    attr_accessor :name, :email, :start_date, :team, :manager, :lunchable_default, :lunchable_survey_response, :lunchable_survey_date, :previous_lunches
+    def initialize(name:, email:, start_date:, team:, manager: nil, lunchable_default: nil, lunchable_survey_response: nil, lunchable_survey_date: nil, previous_lunches: nil)
       @name = name
       @email = email
       @start_date = start_date
       @team = team
       @manager = manager
       @lunchable_default = lunchable_default
-      @lunchable_form = lunchable_form
-      @lunchable_at = lunchable_at
+      @lunchable_survey_response = lunchable_survey_response
+      @lunchable_survey_date = lunchable_survey_date
       @previous_lunches = previous_lunches
     end
 
     def lunchable?
-      if @lunchable_at && (Date.today - @lunchable_at).to_i < 30
-        @lunchable_form == 'Yep'
+      if lunchable_survey_date && (Date.today - lunchable_survey_date).to_i < 30
+        lunchable_survey_response == 'Yep'
       else
-        @lunchable_default != 'FALSE'
+        lunchable_default != 'FALSE'
       end
     end
 
     def days_here
       (Date.today - @start_date).to_i
     end
+
+    def team_value
+      config.team_mappings[@team].to_i
+    end
+
+    def add_lunch(lunch)
+      self.class.new(
+        name: name,
+        email: email,
+        start_date: start_date,
+        team: team,
+        manager: manager,
+        lunchable_default: lunchable_default,
+        lunchable_survey_response: lunchable_survey_response,
+        lunchable_survey_date: lunchable_survey_date,
+        previous_lunches: previous_lunches + Array(lunch)
+      )
+    end
+
+    # def lunches(new_lunch: nil)
+    #   [email, previous_lunches + Array(new_lunch)]
+    # end
+
 
     # def initialize(hash)
     #   # @features = {}

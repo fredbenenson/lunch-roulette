@@ -11,20 +11,11 @@
     Communications: 80
     Operations: 90
     Exec: 110
-  # specialty_mappings:
-  #   Backend: 0
-  #   ST: 50
-  #   Frontend: 10
-  #   Mobile: 20
-  weights:
-    days_here: 0.2
-    team: 0.9
-    # specialty: 0.1
+  tenure_weight: 0.2
+  team_weight: 0.9
+  manager_weight: 1.0
+  colleague_weight: 1.0
+  previous_lunches_weight: 1.0
+  previous_lunches_half_life: 3.0
   min_lunch_group_size: 5
-  min_group_score: 0.0001
-  time_decay_constant: 80.0
-  # hierarchy:
-  #   Bossy McBossface:
-  #     Employee McEmployeeface:
-  #     Coworker McCoworkerface:
-  #   Intern:
+  max_group_score: 0.0001

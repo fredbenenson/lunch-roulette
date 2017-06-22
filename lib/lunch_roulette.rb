@@ -12,9 +12,16 @@ require 'lunch_roulette/lunch_set'
 require 'lunch_roulette/lunch_group'
 require 'lunch_roulette/person'
 require 'lunch_roulette/output'
-require 'sheet_fetcher'
+require 'sheets_client'
 
 class LunchRoulette
+
+  # https://docs.google.com/spreadsheets/d/1cUx7UEk-_AHPWynJDF-1ye9laoPDsElyjNbN9e8JK4g/edit
+  SPREADSHEET_ID = '1cUx7UEk-_AHPWynJDF-1ye9laoPDsElyjNbN9e8JK4g'
+  PEOPLE_RANGE = 'Staff test!A:F'
+  LUNCH_GROUPS_RANGE = 'Lunch groups!A:B'
+  LUNCH_GROUPS_OLD_RANGE = 'Lunch groups old!A:B'
+  SURVEY_RANGE = 'Survey responses!A:C'
 
   attr_reader :results, :people, :all_valid_sets
 
@@ -41,38 +48,92 @@ class LunchRoulette
     LunchRoulette::Config
   end
 
-  def spin!
-    lunchable_people = people.select(&:lunchable?)
-    candidates = Set.new
-    iterations = config.options[:iterations] || 1_000
-    i = 0.0
-    invalid_sets = 0
-    if config.options[:verbose_output]
-      puts "Generating #{config.options[:iterations]} sets..."
+  def run!
+    lunchable_people, unlunchable_people = people.partition(&:lunchable?)
+    begin
+      new_lunch_set = spin(lunchable_people)
+      new_lunch_set.print_scores
+      output_lunch_groups(new_lunch_set.new_lunches + unlunchable_people)
+      send_emails(new_lunch_set)
+    rescue Exception => e
+      puts e.message
     end
-    iterations.times do
-      print "#{((i/iterations)*100).round(4)}% Done\r"
-      i += 1
-      l = LunchSet.new(lunchable_people)
-      if l.valid?
-        candidates << l
-      else
-        invalid_sets += 1
-      end
-    end
-
-    if config.options[:verbose_output]
-      puts "Invalid Sets: #{invalid_sets}"
-      puts "Valid Sets: #{candidates.size}"
-    end
-
-    @results = {
-      top: candidates.sort{|a,b| b.score <=> a.score }.first(config.options[:most_varied_sets].to_i),
-    }
-    # @all_valid_sets = candidates
   end
 
   protected
+
+  def spin(people)
+    candidates = []
+    iterations = config.options[:iterations] || 1000
+    i = 0.0
+    puts "Generating #{config.options[:iterations]} sets..."
+    iterations.times do
+      print "#{((i/iterations)*100).round(4)}% Done, #{candidates.length} valid sets found\r"
+      i += 1
+      l = LunchSet.new(people)
+      candidates << l if l.valid?
+    end
+    raise "No valid lunch sets found!" if candidates.empty? 
+    puts "Invalid Sets: #{iterations - candidates.size}"
+    puts "Valid Sets: #{candidates.size}"
+
+    candidates.sort_by(&:score).first
+  end
+
+  def people
+    @people ||= people_data.map do |person|
+      lunch_groups = lunch_groups_data.
+        select{|g| g['email'] == person['email']}.
+        first.to_h
+      survey = survey_data.
+        select{|s| s['email'] == person['email']}.
+        sort_by{|s| to_date(s['date'])}.
+        reverse.
+        first.to_h
+      Person.new(
+        name: person['name'], 
+        email: person['email'], 
+        start_date: to_date(person['start_date']),
+        team: person['team'], 
+        manager: person['manager'], 
+        lunchable_default: person['lunchable_default'],
+        lunchable_survey_response: survey['response'], 
+        lunchable_survey_date: to_date(survey['date']), 
+        previous_lunches: to_previous_lunches(lunch_groups['previous_lunches'])
+      )
+    end
+  end
+
+  def people_raw_data
+    @people_raw_data ||= SheetsClient.get(SPREADSHEET_ID, PEOPLE_RANGE)
+  end
+
+  def lunch_groups_raw_data
+    @lunch_groups_raw_data ||= SheetsClient.get(SPREADSHEET_ID, LUNCH_GROUPS_RANGE)
+  end
+
+  def survey_raw_data
+    @survey_raw_data ||= SheetsClient.get(SPREADSHEET_ID, SURVEY_RANGE)
+  end
+
+  def people_data
+    @people_data ||= data_hash(people_raw_data)
+  end
+
+  def lunch_groups_data
+    @lunch_groups_data ||= data_hash(lunch_groups_raw_data)
+  end
+
+  def survey_data
+    @survey_data ||= data_hash(survey_raw_data)
+  end
+
+  def data_hash(raw_data, headers: nil)
+    data = raw_data[1..-1]
+    data.map do |row|
+      (headers || raw_data[0]).zip(row).to_h
+    end
+  end
 
   def to_date(str)
     unless str.nil? || str.empty?
@@ -80,44 +141,50 @@ class LunchRoulette
     end
   end
 
-  def to_int_array(str)
+  def to_previous_lunches(str)
     unless str.nil?
-      str.split(',').map{|i| i.to_i }
+      str.split(',').map do |p| 
+        ids = p.strip.split('-')
+        Lunch.new(set_id: ids[0].to_i, group_id: ids[1].to_i)
+      end
+    else
+      []
     end
   end
 
-  def people
-    @people ||= SheetFetcher.fetch.map do |row|
-      Person.new(
-        name: row['name'], 
-        email: row['email'], 
-        start_date: to_date(row['start_date']),
-        team: row['team'], 
-        manager: row['manager'], 
-        lunchable_default: row['lunchable_default'],
-        lunchable_form: row['lunchable_form'], 
-        lunchable_at: to_date(row['lunchable_at']), 
-        previous_lunches: to_int_array(row['previous_lunches'])
-      )
+  def send_emails(lunch_set)
+    lunch_set.groups.each_with_index do |group, i|
+      puts "Group #{i + 1}: #{group.emails}"
     end
-    # CSV.foreach(@staff_csv, headers: true) do |row|
-    #   staffer = Person.new(Hash[row])
-    #   config.weights.keys.map{|f| config.maxes[f] = staffer.features[f] if staffer.features[f] > config.maxes[f].to_i }
-    #   @staff << staffer
-    # end
   end
 
+  def output_lunch_groups(people)
+    data = people.
+      sort_by{|p| p.previous_lunches.length}.
+      reverse.
+      map do |p|
+        [p.email, p.previous_lunches.map(&:to_str).join(', ')]
+      end    
+    headers = ['email', 'previous_lunches']
+    write_csv(lunch_groups_file, data, headers)
+    puts "Lunch groups file written to: #{lunch_groups_file}\n"
+
+    # SheetsClient.update(SPREADSHEET_ID, LUNCH_GROUPS_OLD_RANGE, lunch_groups_raw_data)
+    # SheetsClient.update(SPREADSHEET_ID, LUNCH_GROUPS_RANGE, data, headers: headers)
+  end
+
+  def lunch_groups_file
+    @lunch_groups_file ||= "data/output/lunch_groups_#{DateTime.now.to_s}.csv"
+  end
+
+  def write_csv(file, data, headers)
+    CSV.open(file, "w") do |csv|
+      csv << headers
+      data.each do |row|
+        csv << row
+      end
+    end
+  end
 end
 
-l = LunchRoulette.new(ARGV)
-results = l.spin!
-
-o = LunchRoulette::Output.new(l.results, l.all_valid_sets)
-o.get_results
-o.get_stats_csv if o.config.options[:output_stats]
-
-if l.results[:top].size > 0 || l.results[:bottom].size > 0
-  o.get_new_staff_csv(l.staff)
-else
-  puts "No valid sets generated, sorry."
-end
+LunchRoulette.new(ARGV).run!

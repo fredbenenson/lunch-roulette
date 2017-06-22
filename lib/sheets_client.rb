@@ -4,14 +4,14 @@ require 'googleauth/stores/file_token_store'
 
 require 'fileutils'
 
-class SheetFetcher
+class SheetsClient
 
   OOB_URI = 'urn:ietf:wg:oauth:2.0:oob'
   APPLICATION_NAME = 'Lunch Roulette client'
   CLIENT_SECRETS_PATH = 'config/client_secret.json'
   CREDENTIALS_PATH = File.join(Dir.home, '.credentials',
                                "sheets.googleapis.com-lunch-roulette-client.yaml")
-  SCOPE = Google::Apis::SheetsV4::AUTH_SPREADSHEETS_READONLY
+  SCOPE = Google::Apis::SheetsV4::AUTH_SPREADSHEETS
 
   ##
   # Ensure valid credentials, either by restoring from the saved credentials
@@ -49,29 +49,17 @@ class SheetFetcher
     service
   end
 
-  def self.download_sheet
-    # https://docs.google.com/spreadsheets/d/1cUx7UEk-_AHPWynJDF-1ye9laoPDsElyjNbN9e8JK4g/edit
-    spreadsheet_id = '1cUx7UEk-_AHPWynJDF-1ye9laoPDsElyjNbN9e8JK4g'
-    range = 'Staff_test!A:I'
+  def self.get(spreadsheet_id, range)
     response = initialize_api.get_spreadsheet_values(spreadsheet_id, range)
     response.values
   end
 
-  def self.fetch
-    sheet = download_sheet
-    headers = sheet[0]
-    data = sheet[1..-1]
-    data.map do |row|
-      headers.zip(row).to_h
-    end
+  def self.update(spreadsheet_id, range, data, headers: nil)
+    value_range = Google::Apis::SheetsV4::ValueRange.new(
+      majorDimension: "ROWS",
+      range: range,
+      values: headers.nil? ? data : [headers] + data
+    )
+    initialize_api.update_spreadsheet_value(spreadsheet_id, range, value_range, value_input_option: 'RAW')
   end
-  # puts 'Name, Lunchable:'
-  # puts 'No data found.' if response.values.empty?
-  # puts response.inspect
-
-  # employees = response.values.map do |row|
-  #   Hash.new()
-  #   # Print columns A and E, which correspond to indices 0 and 4.
-  #   puts "#{row[1]}, #{row[8]}"
-  # end
 end
