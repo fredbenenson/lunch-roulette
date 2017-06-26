@@ -8,6 +8,7 @@ class LunchRoulette
     MANAGER_WEIGHT = Config.manager_weight
     COLLEAGUE_WEIGHT = Config.colleague_weight
     PREVIOUS_LUNCHES_WEIGHT = Config.previous_lunches_weight
+    PREVIOUS_LUNCHES_HALF_LIFE = Config.previous_lunches_half_life
 
     attr_accessor :id, :people
 
@@ -61,8 +62,13 @@ class LunchRoulette
       latest_lunch = people.first.latest_lunch
       previous_lunches.uniq.reduce(0) do |sum, prev_lunch|
         count = previous_lunches.count{|p| prev_lunch.equals(p)}
-        sum + (count - 1) ** 2 * latest_lunch.previous_lunch_decay(prev_lunch)
+        sum + (count - 1) ** 2 * previous_lunch_weight(prev_lunch, latest_lunch)
       end
+    end
+
+    def previous_lunch_weight(prev_lunch, new_lunch)
+      coeff = -1.0 * Math.log(2) / (PREVIOUS_LUNCHES_HALF_LIFE)
+      Math.exp(coeff * (new_lunch.set_id - prev_lunch.set_id - 1))
     end
 
     def inspect_scores
