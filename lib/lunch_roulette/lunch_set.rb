@@ -1,31 +1,21 @@
 class LunchRoulette
   class LunchSet
 
-    attr_accessor :people, :groups
+    MIN_GROUP_SIZE = Config.min_group_size
+
+    attr_accessor :id, :groups
 
     def initialize(people)
-      @people = people
-      @groups = generate_groups
+      @id = generate_id(people)
+      @groups = generate_groups(people)
     end
 
-    def config
-      LunchRoulette::Config
+    def generate_id(people)
+      people.flat_map(&:lunches).map(&:set_id).max + 1
     end
 
-    def inspect
-      groups.map.with_index{|group, index| "Group #{index + 1}: #{group.inspect}"}
-    end
-
-    def score
-      @score ||= groups.map(&:score).sum
-    end
-
-    def id
-      @id ||= people.flat_map(&:previous_lunches).map(&:set_id).max + 1
-    end
-
-    def generate_groups
-      group_count = people.length / config.min_lunch_group_size
+    def generate_groups(people)
+      group_count = people.length / MIN_GROUP_SIZE
       groups = []
       people.shuffle.each_with_index do |person, i|
         group_index = i % group_count
@@ -33,25 +23,30 @@ class LunchRoulette
       end
       groups.map.with_index do |g, i| 
         LunchGroup.new(
-          people: g, 
-          lunch: Lunch.new(set_id: id, group_id: i)
+          id: i + 1,
+          people: g.map{|p| p.add_lunch(Lunch.new(set_id: id, group_id: i + 1))}
         )
       end
     end
 
-    def new_lunches
-      groups.flat_map do |g|
-        g.people.map{|p| p.add_lunch(g.lunch)}
-      end
+    def people
+      @people ||= groups.flat_map(&:people)
     end
 
-    def print_scores
-      puts "Overall score: #{score}"
-      groups.each(&:print_scores)
+    def score
+      @score ||= groups.map(&:score).sum
     end
 
     def valid?
-      groups.map(&:valid?).all?
+      @valid ||= groups.map(&:valid?).all?
+    end
+
+    def inspect_scores
+      ["Winning set's savory score: #{score}", groups.map(&:inspect_scores)].join("\n ")
+    end
+
+    def inspect_emails
+      ["Gastronomical group emails:", groups.map(&:inspect_emails)].join("\n ")
     end
   end
 end

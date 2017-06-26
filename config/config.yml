@@ -1,0 +1,34 @@
+---
+  spreadsheet_id: '1cUx7UEk-_AHPWynJDF-1ye9laoPDsElyjNbN9e8JK4g'
+  spreadsheet_url: 'https://docs.google.com/spreadsheets/d/1cUx7UEk-_AHPWynJDF-1ye9laoPDsElyjNbN9e8JK4g/edit'
+  people_range: 'People!A:G'
+  people_old_range: 'People old!A:G'
+  survey_range: 'Survey responses!A:C'
+
+  person_date_format: '%m/%d/%Y'
+  survey_date_format: '%m/%d/%Y %T'
+  file_date_format: '%Y-%m-%d_%T'
+
+  team_mappings:
+    Engineering: 0
+    Data: 10
+    Product: 20
+    Design: 30
+    Marketing: 40
+    Outreach: 50
+    Community Support: 60
+    Integrity: 70
+    Communications: 80
+    Operations: 90
+    Exec: 110
+
+  tenure_weight: 0.2
+  team_weight: 0.9
+  manager_weight: 1.0
+  colleague_weight: 1.0
+  previous_lunches_weight: 1.0
+  previous_lunches_half_life: 3.0
+
+  iterations: 25
+  min_group_size: 4
+  max_group_score: 1000

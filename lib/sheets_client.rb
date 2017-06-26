@@ -50,16 +50,21 @@ class SheetsClient
   end
 
   def self.get(spreadsheet_id, range)
-    response = initialize_api.get_spreadsheet_values(spreadsheet_id, range)
-    response.values
+    values = initialize_api.get_spreadsheet_values(spreadsheet_id, range).values
+    header = values[0] || []
+    rows = values[1..-1] || []
+    rows.map do |row|
+      header.zip(row).to_h
+    end
   end
 
-  def self.update(spreadsheet_id, range, data, headers: nil)
+  def self.update(spreadsheet_id, range, rows)
+    header = rows.first.keys
     value_range = Google::Apis::SheetsV4::ValueRange.new(
       majorDimension: "ROWS",
       range: range,
-      values: headers.nil? ? data : [headers] + data
+      values: [header] + rows.map{|row| header.map{|k| row[k]}}
     )
-    initialize_api.update_spreadsheet_value(spreadsheet_id, range, value_range, value_input_option: 'RAW')
+    initialize_api.update_spreadsheet_value(spreadsheet_id, range, value_range, value_input_option: 'USER_ENTERED')
   end
 end
