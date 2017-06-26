@@ -64,16 +64,5 @@ class LunchRoulette
         'lunches' => lunches.map(&:to_s).join(', ')
       }
     end
-
-    def self.to_lunches(str)
-      unless str.nil?
-        str.split(',').map do |p| 
-          ids = p.strip.split('-')
-          Lunch.new(set_id: ids[0].to_i, group_id: ids[1].to_i)
-        end
-      else
-        []
-      end
-    end
   end
 end

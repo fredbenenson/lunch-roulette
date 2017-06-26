@@ -115,7 +115,7 @@ class LunchRoulette
           team: p['team'], 
           manager: p['manager'] && p['manager'].empty? ? nil : p['manager'], 
           lunchable_default: p['lunchable_default'],
-          lunches: Person.to_lunches(p['lunches']),
+          lunches: String(p['lunches']).split(',').map{|s| Lunch.from_s(s)},
           survey: surveys.
             select{|s| s.email == p['email']}.
             sort_by(&:date).
