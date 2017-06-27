@@ -2,7 +2,8 @@ class LunchRoulette
 
   class Person
 
-    TEAM_MAPPINGS = Config.team_mappings
+    TEAM_MAPPINGS = Config.config[:team_mappings]
+    LUNCHABLE_FALSE = Config.config[:lunchable_false]
 
     attr_accessor :name, :email, :start_date, :team, :manager, :lunchable_default, :lunches, :survey
     def initialize(name:, email:, start_date:, team:, manager: nil, lunchable_default: nil, lunches: nil, survey: nil)
@@ -17,11 +18,7 @@ class LunchRoulette
     end
 
     def lunchable?
-      if survey && (Date.today - survey.date).to_i < 30
-        survey.response == 'Yep'
-      else
-        lunchable_default != 'FALSE'
-      end
+      survey ? survey.lunchable? : lunchable_default
     end
 
     def days_here

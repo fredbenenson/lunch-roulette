@@ -1,14 +1,16 @@
 class LunchRoulette
   class LunchGroup
 
-    MAX_GROUP_SCORE = Config.max_group_score
+    MAX_GROUP_SCORE = Config.config[:max_group_score]
+    MAX_MANAGER_SCORE = Config.config[:max_manager_score]
+    MAX_PREVIOUS_LUNCHES_SCORE = Config.config[:max_previous_lunches_score]
 
-    TENURE_WEIGHT = Config.tenure_weight
-    TEAM_WEIGHT = Config.team_weight
-    MANAGER_WEIGHT = Config.manager_weight
-    COLLEAGUE_WEIGHT = Config.colleague_weight
-    PREVIOUS_LUNCHES_WEIGHT = Config.previous_lunches_weight
-    PREVIOUS_LUNCHES_HALF_LIFE = Config.previous_lunches_half_life
+    TENURE_WEIGHT = Config.config[:tenure_weight]
+    TEAM_WEIGHT = Config.config[:team_weight]
+    MANAGER_WEIGHT = Config.config[:manager_weight]
+    COLLEAGUE_WEIGHT = Config.config[:colleague_weight]
+    PREVIOUS_LUNCHES_WEIGHT = Config.config[:previous_lunches_weight]
+    PREVIOUS_LUNCHES_HALF_LIFE = Config.config[:previous_lunches_half_life]
 
     attr_accessor :id, :people
 
@@ -23,8 +25,8 @@ class LunchRoulette
 
     def valid?
       # score <= MAX_GROUP_SCORE &&
-        manager_score <= 1 &&
-        previous_lunches_score < 1
+        manager_score < MAX_MANAGER_SCORE &&
+        previous_lunches_score < MAX_PREVIOUS_LUNCHES_SCORE
     end
 
     def score
@@ -73,14 +75,33 @@ class LunchRoulette
       Math.exp(coeff * (new_lunch.set_id - prev_lunch.set_id - 1))
     end
 
+    def inspect
+      "Group #{id}: " + people.map(&:name).join(', ')
+    end
+
+    def inspect_previous_groups
+      previous_groups = Hash.new([])
+      people.each do |p|
+        p.previous_lunches.each do |l|
+          previous_groups[l.to_s] += [p.name]
+        end
+      end
+      previous_groups.
+        select{|k, v| v.length > 1}.
+        sort_by{|k, v| Lunch.from_s(k).set_id}.
+        reverse.
+        map{|k, v| "#{k}: [" + v.join(', ') + ']'}.
+        join(', ')
+    end
+
     def inspect_scores
       "Group #{id}: " + 
-      "score #{score} ("+
-        "tenure #{tenure_score}, " +
-        "teams #{team_score}, " +
-        "managers #{manager_score}, " +
-        "colleagues #{colleague_score}, " +
-        "previous_lunches #{previous_lunches_score})"
+      "score #{score.round(3)} ("+
+        "tenure #{tenure_score.round(3)}, " +
+        "teams #{team_score.round(3)}, " +
+        "managers #{manager_score.round(3)}, " +
+        "colleagues #{colleague_score.round(3)}, " +
+        "previous_lunches #{previous_lunches_score.round(3)})"
     end
 
     def inspect_emails
@@ -88,4 +109,3 @@ class LunchRoulette
     end
   end
 end
-

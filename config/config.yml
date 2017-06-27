@@ -5,9 +5,25 @@
   people_old_range: 'People old!A:G'
   survey_range: 'Survey responses!A:C'
 
+  people_input_file: 'data/people.csv'
+  people_output_file: 'data/output/people.csv'
+  people_old_output_file: 'data/output/people_old.csv'
+
   person_date_format: '%m/%d/%Y'
   survey_date_format: '%m/%d/%Y %T'
   file_date_format: '%Y-%m-%d_%T'
+
+  lunchable_true: 'TRUE'
+  survey_yes: 'Yep'
+
+  survey_current_lag: 20
+
+  iterations: 1_000
+  min_group_size: 4
+
+  max_group_score: 1000
+  max_manager_score: 1
+  max_previous_lunches_score: 2
 
   team_mappings:
     Engineering: 0
@@ -28,7 +44,3 @@
   colleague_weight: 1.0
   previous_lunches_weight: 2.5
   previous_lunches_half_life: 1.5
-
-  iterations: 1000
-  min_group_size: 4
-  max_group_score: 1000

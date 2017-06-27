@@ -1,7 +1,7 @@
 class LunchRoulette
   class LunchSet
 
-    MIN_GROUP_SIZE = Config.min_group_size
+    MIN_GROUP_SIZE = Config.config[:min_group_size]
 
     attr_accessor :id, :groups
 
@@ -44,11 +44,19 @@ class LunchRoulette
     end
 
     def inspect_scores
-      ["Winning set's savory score: #{score}", groups.map(&:inspect_scores)].join("\n ")
+      ["Sautéing winning set #{id}'s savory scores: Overall score #{score.round(3)}", groups.map(&:inspect_scores)].join("\n")
+    end
+
+    def inspect_previous_groups
+      "Serving winning set #{id}'s palatable previous groups:\n" + 
+        groups.map do |g| 
+          previous_groups = g.inspect_previous_groups
+          [g.inspect, previous_groups.empty? ? '🐣  No previous shared lunches!' : '🥚  ' + previous_groups].compact.join("\n ")
+        end.join("\n")
     end
 
     def inspect_emails
-      ["Gastronomical group emails:", groups.map(&:inspect_emails)].join("\n ")
+      ["Plating winning set #{id}'s gastronomical group emails:", groups.map(&:inspect_emails)].join("\n")
     end
   end
 end
