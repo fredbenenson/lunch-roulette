@@ -43,20 +43,24 @@ class LunchRoulette
       @valid ||= groups.map(&:valid?).all?
     end
 
-    def inspect_scores
-      ["Sautéing winning set #{id}'s savory scores: Overall score #{score.round(3)}", groups.map(&:inspect_scores)].join("\n")
+    def inspect_previous_groups
+      groups.map do |g| 
+        previous_groups = g.inspect_previous_groups
+        if previous_groups.empty?
+          "🐣  #{g.inspect}\n   No prior shared lunches!"
+        else
+          "🥚  #{g.inspect}\n   #{previous_groups.length} prior#{'s' unless previous_groups.length == 1}: " + 
+          previous_groups.join(', ')
+        end
+      end.join("\n")
     end
 
-    def inspect_previous_groups
-      "Serving winning set #{id}'s palatable previous groups:\n" + 
-        groups.map do |g| 
-          previous_groups = g.inspect_previous_groups
-          [g.inspect, previous_groups.empty? ? '🐣  No previous shared lunches!' : '🥚  ' + previous_groups].compact.join("\n ")
-        end.join("\n")
+    def inspect_scores
+      ["Overall score #{score.round(3)}", groups.map(&:inspect_scores)].join("\n")
     end
 
     def inspect_emails
-      ["Plating winning set #{id}'s gastronomical group emails:", groups.map(&:inspect_emails)].join("\n")
+      groups.map(&:inspect_emails).join("\n")
     end
   end
 end

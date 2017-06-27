@@ -7,7 +7,6 @@
 
   people_input_file: 'data/people.csv'
   people_output_file: 'data/output/people.csv'
-  people_old_output_file: 'data/output/people_old.csv'
 
   person_date_format: '%m/%d/%Y'
   survey_date_format: '%m/%d/%Y %T'
@@ -23,7 +22,7 @@
 
   max_group_score: 1000
   max_manager_score: 1
-  max_previous_lunches_score: 2
+  max_previous_lunches_score: 1
 
   team_mappings:
     Engineering: 0

@@ -90,8 +90,7 @@ class LunchRoulette
         select{|k, v| v.length > 1}.
         sort_by{|k, v| Lunch.from_s(k).set_id}.
         reverse.
-        map{|k, v| "#{k}: [" + v.join(', ') + ']'}.
-        join(', ')
+        map{|k, v| "#{k}: [" + v.join(', ') + ']'}
     end
 
     def inspect_scores

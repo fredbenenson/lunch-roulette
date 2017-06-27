@@ -1,22 +1,29 @@
-Command Line App
-================
+# 🥑🥒🍔🍇 Lunch Roulette 🐓🌮🍕🍦
 
-Lunch Roulette is a command line application that always requires a CSV file with staff "features", such as their team and specialty and start date. It is run using the ruby executable and specifying the staff via a CSV file:
+Lunch Roulette is a tool for finding diverse dining groups among coworkers and friends. It uses staff data (stored in Google Sheets or in CSV form) to generate small lunch groups of people from different teams and tenures who haven't dined together before.
+
+With a single command, Lunch Roulette will download staff data and participation survey results from Google Sheets, scan through thousands of possible lunch groups until it finds the best one, update the Google Sheet with the results, and print out the emails of each group for dispersal. 
+
+This is a forked version of the original [Lunch Roulette](https://github.com/fredbenenson/lunch-roulette), written and [blogged about](https://kickstarter.engineering/lunch-roulette-f5272a3990b9) by [Fred Benenson](https://twitter.com/fredbenenson)🐋.
+
+## How it works
+
+Lunch Roulette is a command line application written in Ruby. It requires a CSV file with staff information and "features," such as their team, manager, and start date. This file can live offline in CSV form, or it can exist as a Google Sheet, which Lunch Roulette accesses through the Google Sheets API. 
+
+It is run using the ruby executable:
 
 ```ruby
-ruby lib/lunch_roulette.rb data/staff.csv
+ruby lib/lunch_roulette.rb
 ```
 
-Features are things like the team that a staffer is on, or the day they started. These features can be weighted in different ways and mapped so that some values are "closer" to others.
+Features are things like the team that a person is on, or the day they started. These features can be weighted in different ways and mapped so that some values are "closer" to others.
 
-Along with specifying the various weights and mappings Lunch Roulette users, configurable options include the number of people per group, the number of iterations to perform, and the number of groups to output:
+Along with specifying the various weights and mappings of Lunch Roulette users, other configurable options include the number of people per group, the number of iterations to perform, and the number of groups to output:
 
 ```
-Usage: ruby lunch_roulette_generator.rb staff.csv [OPTIONS]
+Usage: ruby lunch_roulette.rb [OPTIONS]
   -n, --min-group-size N           Minimum Lunch Group Size (default 4)
   -i, --iterations I               Number of Iterations (default 1,000)
-  -m, --most-varied-sets M         Number of most varied sets to generate (default 1)
-  -l, --least-varied-sets L        Number of least varied sets to generate (default 0)
   -v, --verbose                    Verbose output
   -d, --dont-write                 Don't write to files
   -h, --help                       Print this help

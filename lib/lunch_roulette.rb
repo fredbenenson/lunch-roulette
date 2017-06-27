@@ -34,7 +34,6 @@ class LunchRoulette
 
   TIME_NOW = DateTime.now
   PEOPLE_INPUT_FILE = Config.config[:people_input_file]
-  PEOPLE_OLD_OUTPUT_FILE = Config.config[:people_old_output_file].split('.csv').first + '_' + TIME_NOW.strftime(FILE_DATE_FORMAT).to_s + '.csv'
   PEOPLE_OUTPUT_FILE = Config.config[:people_output_file].split('.csv').first + '_' + TIME_NOW.strftime(FILE_DATE_FORMAT).to_s + '.csv'
 
   def initialize(*args)
@@ -54,25 +53,23 @@ class LunchRoulette
 
   def run!
     begin
-      puts "🥑  Consuming delicious data:"
+      puts "🥑  Devouring delicious data:"
       lunchable_people, unlunchable_people = people.partition(&:lunchable?)
 
-      puts "🥒  Cooking up #{Config.options[:iterations] || ITERATIONS} scrumptious sets:"
+      puts "🥒  Slicing up #{Config.options[:iterations] || ITERATIONS} scrumptious sets:"
       unless lunch_set = spin(lunchable_people, Config.options[:iterations] || ITERATIONS)
-        puts "No valid sets found!"
+        puts "🔪  No lunch sets made the cut!"
         return
       end
+      puts "🍇  We have a winner! Set ##{lunch_set.id} is born, with #{lunch_set.groups.size} great groups"
 
-      puts "🍕  #{lunch_set.inspect_previous_groups}"
-      puts "🌮  #{lunch_set.inspect_scores}"
-      puts "🍔  #{lunch_set.inspect_emails}"
+      puts "🐓  Plating palatable previous groups:\n#{lunch_set.inspect_previous_groups}"
+      puts "🌮  Sautéing savory scores:\n#{lunch_set.inspect_scores}"
+      puts "🍕  Grilling gastronomical group emails:\n#{lunch_set.inspect_emails}"
 
-      puts "🍱  Catering flavorful files:"
+      puts "🍦  Flash-freezing flavorful files:"
       people_old_rows = people.sort_by(&:start_date).map(&:to_row)
       people_rows = (lunch_set.people + unlunchable_people).sort_by(&:start_date).map(&:to_row)
-
-      puts "Writing previous people file to: #{PEOPLE_OLD_OUTPUT_FILE}"
-      InputOutput.write_csv(PEOPLE_OLD_OUTPUT_FILE, people_old_rows)
 
       puts "Writing new people file to: #{PEOPLE_OUTPUT_FILE}"
       InputOutput.write_csv(PEOPLE_OUTPUT_FILE, people_rows)
@@ -97,7 +94,7 @@ class LunchRoulette
     winner = iterations.times.reduce(nil) do |leader|
       new_set = LunchSet.generate(people)
       valid_sets += 1 if new_set.valid?
-      print "Valid sets found: #{valid_sets}. Percent complete: #{((100.0 * (i += 1) / iterations)).round(4)}%\r"
+      print "#{valid_sets == 0 ? '🐄' : '🍔'}  Valid sets found: #{valid_sets}. Percent complete: #{((100.0 * (i += 1) / iterations)).round(4)}%\r"
 
       [leader, new_set].compact.select(&:valid?).min_by(&:score)
     end.tap{puts "\n"}
