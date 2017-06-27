@@ -6,8 +6,8 @@ class LunchRoulette
       @group_id = group_id
     end
 
-    def equals(other_lunch)
-      set_id == other_lunch.set_id && group_id = other_lunch.group_id
+    def eql?(other_lunch)
+      set_id == other_lunch.set_id && group_id == other_lunch.group_id
     end
 
     def to_s

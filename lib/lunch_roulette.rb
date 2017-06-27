@@ -91,7 +91,7 @@ class LunchRoulette
     i = 0
     valid_sets = 0
     winner = iterations.times.reduce(nil) do |leader|
-      new_set = LunchSet.new(people)
+      new_set = LunchSet.generate(people)
       valid_sets += 1 if new_set.valid?
       print " Valid sets found: #{valid_sets}. Percent complete: #{((100.0 * (i += 1) / iterations)).round(4)}%\r"
 

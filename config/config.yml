@@ -27,7 +27,7 @@
   manager_weight: 1.0
   colleague_weight: 1.0
   previous_lunches_weight: 2.5
-  previous_lunches_half_life: 6.0
+  previous_lunches_half_life: 1.5
 
   iterations: 1000
   min_group_size: 4

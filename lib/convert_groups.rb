@@ -2,37 +2,24 @@ require 'csv'
 require 'set'
 
 IN_CSV = 'data/people_legacy.csv'
-OUT_CSV = 'data/people.csv'
+OUT_CSV = 'data/people_converted.csv'
+ID_FIELD = 'email'
+LEGACY_LUNCHES_FIELD = 'previous_lunches'
+LUNCHES_FIELD = 'lunches'
 
 def read_people
   people = []
   CSV.foreach(IN_CSV, headers: true) do |row|
-    person = Hash[row]
-    people << {
-      name: person['name'], 
-      email: person['email'], 
-      start_date: person['start_date'],
-      team: person['team'],
-      manager: person['manager'],
-      lunchable_default: person['lunchable'],
-      lunches: parse_lunches(person['previous_lunches'])}
+    people << Hash[row].merge(legacy_lunches: String(row[LEGACY_LUNCHES_FIELD]).split(',').map(&:to_i))
   end
   people
-end
-
-def parse_lunches(str)
-  unless str.nil?
-    str.split(',').map(&:to_i)
-  else
-    []
-  end
 end
 
 def lunch_groups(people)
   lunches = Hash.new([])
   people.each do |p|
-    p[:lunches].each do |l|
-      lunches[l] += [p[:email]]
+    p[:legacy_lunches].each do |l|
+      lunches[l] += [p[ID_FIELD]]
     end
   end
   lunches.sort_by{|l| l[0]}
@@ -63,10 +50,13 @@ end
 
 def people_set_groups(people, set_groups)
   people.map do |p|
-    p_set_groups = p[:lunches].map do |l|
+    p_set_groups = p[:legacy_lunches].map do |l|
       set_groups[l]
     end
-    p.merge({lunches: p_set_groups})
+    p.merge(
+      lunches: p_set_groups,
+      LUNCHES_FIELD => p_set_groups.map{|l| "#{l[:set]}-#{l[:group]}"}.join(', ')
+    )
   end.sort_by{|p| p[:lunches].length}.reverse
 end
 
@@ -78,16 +68,16 @@ def valid?(people_set_groups)
 end
 
 def write_csv(people_set_groups)
+  header = people_set_groups.first.keys.reject{|k| [:legacy_lunches, :lunches].include?(k)}
   CSV.open(OUT_CSV, "w") do |csv|
-    csv << ['name', 'email', 'start_date', 'team', 'manager', 'lunchable_default', 'lunches']
+    csv << header
     people_set_groups.each do |row|
-      csv << [row[:name], row[:email], row[:start_date], row[:team], row[:manager], row[:lunchable_default], row[:lunches].map{|l| "#{l[:set]}-#{l[:group]}"}.join(', ')]
+      csv << header.map{|k| row[k]}
     end
   end
 end
 
 people = read_people
-puts people.inspect
 set_groups = set_groups(lunch_sets(lunch_groups(people)))
 people_set_groups = people_set_groups(people, set_groups)
 

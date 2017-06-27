@@ -22,8 +22,9 @@ class LunchRoulette
     end
 
     def valid?
-      score <= MAX_GROUP_SCORE &&
-        manager_score <= 1
+      # score <= MAX_GROUP_SCORE &&
+        manager_score <= 1 &&
+        previous_lunches_score < 1
     end
 
     def score
@@ -60,8 +61,9 @@ class LunchRoulette
     def previous_lunches_score
       previous_lunches = people.flat_map(&:previous_lunches)
       latest_lunch = people.first.latest_lunch
-      previous_lunches.uniq.reduce(0) do |sum, prev_lunch|
-        count = previous_lunches.count{|p| prev_lunch.equals(p)}
+
+      previous_lunches.uniq(&:to_s).reduce(0) do |sum, prev_lunch|
+        count = previous_lunches.count{|p| prev_lunch.eql?(p)}
         sum + (count - 1) ** 2 * previous_lunch_weight(prev_lunch, latest_lunch)
       end
     end
