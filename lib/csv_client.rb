@@ -1,4 +1,4 @@
-class InputOutput
+class CsvClient
   def self.read_csv(file)
     rows = []
     CSV.foreach(file, headers: true) do |row|

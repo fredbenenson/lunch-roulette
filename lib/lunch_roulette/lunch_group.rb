@@ -1,7 +1,6 @@
 class LunchRoulette
   class LunchGroup
 
-    MAX_GROUP_SCORE = Config.config[:max_group_score]
     MAX_MANAGER_SCORE = Config.config[:max_manager_score]
     MAX_PREVIOUS_LUNCHES_SCORE = Config.config[:max_previous_lunches_score]
 
@@ -24,8 +23,7 @@ class LunchRoulette
     end
 
     def valid?
-      # score <= MAX_GROUP_SCORE &&
-        manager_score < MAX_MANAGER_SCORE &&
+      manager_score < MAX_MANAGER_SCORE &&
         previous_lunches_score < MAX_PREVIOUS_LUNCHES_SCORE
     end
 

@@ -13,7 +13,7 @@ require 'lunch_roulette/lunch_set'
 require 'lunch_roulette/lunch_group'
 require 'lunch_roulette/person'
 require 'lunch_roulette/survey'
-require 'input_output'
+require 'csv_client'
 require 'sheets_client'
 
 class LunchRoulette
@@ -42,11 +42,12 @@ class LunchRoulette
 
     o = OptionParser.new do |o|
       o.banner = "Usage: ruby lunch_roulette.rb [OPTIONS]"
-      o.on('-f', '--file F', 'Read data from provided CSV') { |f| options[:file] = f.to_s }
-      o.on('-o', '--offline', "Offline mode: read and write CSV data locally; default read location is #{PEOPLE_INPUT_FILE}") { options[:offline] = true }
+      o.on('-f', '--file F', 'Offline people input: read people data from provided CSV') { |f| options[:people_file] = f.to_s }
+      o.on('-s', '--file S', 'Offline survey input: read survey data from provided CSV') { |s| options[:survey_file] = f.to_s }
+      o.on('-o', '--offline', "Offline output: write timestamped CSV data locally to output directory") { options[:offline] = true }
       o.on('-i', '--iterations I', "Iterations, default #{ITERATIONS}") { |i| options[:iterations] = i.to_i }
       o.on('-v', '--valid', "Stop searching when the first valid set is encountered") { options[:valid] = true }
-      o.on('-c', '--concise', "Concise output: suppress stats and previous-lunches printouts.") { |c| options[:concise_output] = true }
+      o.on('-c', '--concise', "Concise output: suppress stats and previous-lunches printouts") { |c| options[:concise_output] = true }
       o.on('-h', '--help', 'Print this help') { puts o; exit }
       o.parse!
     end
@@ -71,11 +72,11 @@ class LunchRoulette
       puts "🍕  Grilling gastronomical group emails:\n#{lunch_set.inspect_emails}"
 
       puts "🍦  Flash-freezing flavorful files:"
-      puts "Writing new people file to: #{PEOPLE_OUTPUT_FILE}"
       people_rows = (lunch_set.people + unlunchable_people).sort_by(&:start_date).map(&:to_row)
-      InputOutput.write_csv(PEOPLE_OUTPUT_FILE, people_rows)
-
-      unless Config.options[:offline]
+      if Config.options[:offline]
+        puts "Writing new people file to: #{PEOPLE_OUTPUT_FILE}"
+        CsvClient.write_csv(PEOPLE_OUTPUT_FILE, people_rows)
+      else
         puts "Updating previous people sheet at: #{SPREADSHEET_URL}"
         people_old_rows = people.sort_by(&:start_date).map(&:to_row)
         SheetsClient.update(SPREADSHEET_ID, PEOPLE_OLD_RANGE, people_old_rows)
@@ -106,9 +107,9 @@ class LunchRoulette
 
   def people
     @people ||= 
-      if Config.options[:file] || Config.options[:offline]
-        puts "Reading people file from: #{Config.options[:file] || PEOPLE_INPUT_FILE}"
-        InputOutput.read_csv(Config.options[:file] || PEOPLE_INPUT_FILE)
+      if Config.options[:people_file]
+        puts "Reading people file from: #{Config.options[:people_file]}"
+        CsvClient.read_csv(Config.options[:people_file])
       else
         puts "Downloading people sheet from: #{SPREADSHEET_URL}"
         SheetsClient.get(SPREADSHEET_ID, PEOPLE_RANGE)
@@ -133,8 +134,9 @@ class LunchRoulette
 
   def surveys
     @surveys ||= 
-      if Config.options[:file] || Config.options[:offline]
-        []
+      if Config.options[:survey_file]
+        puts "Reading survey file from: #{Config.options[:survey_file]}"
+        CsvClient.read_csv(Config.options[:survey_file])
       else
         puts "Downloading surveys sheet from: #{SPREADSHEET_URL}"
         SheetsClient.get(SPREADSHEET_ID, SURVEY_RANGE)

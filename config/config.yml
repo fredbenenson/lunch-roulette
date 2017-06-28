@@ -1,8 +1,8 @@
 ---
   spreadsheet_id: '1cUx7UEk-_AHPWynJDF-1ye9laoPDsElyjNbN9e8JK4g'
   spreadsheet_url: 'https://docs.google.com/spreadsheets/d/1cUx7UEk-_AHPWynJDF-1ye9laoPDsElyjNbN9e8JK4g/edit'
-  people_range: 'People!A:G'
-  people_old_range: 'People old!A:G'
+  people_range: 'People sample!A:G'
+  people_old_range: 'People sample old!A:G'
   survey_range: 'Survey responses!A:C'
 
   people_input_file: 'data/people.csv'
@@ -18,11 +18,10 @@
   survey_current_lag: 20
 
   iterations: 1_000
-  min_group_size: 5
+  min_group_size: 4
 
-  max_group_score: 1000
   max_manager_score: 1
-  max_previous_lunches_score: 1.5
+  max_previous_lunches_score: 2
 
   team_mappings:
     Engineering: 0
@@ -42,4 +41,4 @@
   manager_weight: 1.0
   colleague_weight: 1.0
   previous_lunches_weight: 2.5
-  previous_lunches_half_life: 1.5
+  previous_lunches_half_life: 2

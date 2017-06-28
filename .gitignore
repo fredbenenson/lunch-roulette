@@ -2,4 +2,5 @@
 .ruby-version
 config/client_secret.json
 data/*
-!data/staff.csv
+!data/people_sample.csv
+!data/surveys_sample.csv

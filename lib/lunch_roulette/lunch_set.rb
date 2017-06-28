@@ -11,7 +11,7 @@ class LunchRoulette
     end
 
     def self.generate(people)
-      set_id = people.flat_map(&:lunches).map(&:set_id).max + 1
+      set_id = people.flat_map(&:lunches).map(&:set_id).max.to_i + 1
       groups = generate_groups(set_id: set_id, people: people)
       new(id: set_id, groups: groups)
     end

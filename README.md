@@ -4,11 +4,11 @@ Lunch Roulette is a tool for finding diverse dining groups among coworkers and f
 
 With a single command, Lunch Roulette will download staff data and participation survey results from Google Sheets, scan through thousands of possible lunch groups until it finds the best one, update the Google Sheet with the results, and print out the emails of each group for dispersal. 
 
-This is a forked version of the original [Lunch Roulette](https://github.com/fredbenenson/lunch-roulette), written and [blogged about](https://kickstarter.engineering/lunch-roulette-f5272a3990b9) by [Fred Benenson](https://twitter.com/fredbenenson)🐋.
+This is a forked version of the original [Lunch Roulette](https://github.com/fredbenenson/lunch-roulette), written and [blogged about](https://kickstarter.engineering/lunch-roulette-f5272a3990b9) by [Fred Benenson](https://twitter.com/fredbenenson) 🐋.
 
 ## How it works
 
-Lunch Roulette is a command line application written in Ruby. It requires a CSV file with staff information and "features," such as their team, manager, and start date. This file can live offline in CSV form, or it can exist as a Google Sheet, which Lunch Roulette accesses through the Google Sheets API. 
+Lunch Roulette is a command line application written in Ruby. It requires a CSV file with staff information and "features," such as their team, manager, and start date. This file can live offline in CSV form, or it can exist as a Google Sheet which Lunch Roulette accesses through the Google Sheets API. 
 
 It is run using the ruby executable:
 
@@ -16,77 +16,63 @@ It is run using the ruby executable:
 ruby lib/lunch_roulette.rb
 ```
 
-Features are things like the team that a person is on, or the day they started. These features can be weighted in different ways and mapped so that some values are "closer" to others.
+Features are things like the team that a person is on, or the day they started. These features can be weighted in different ways and mapped so that some values are "closer" to others. These weights and mappings are stored in a config file.
 
-Along with specifying the various weights and mappings of Lunch Roulette users, other configurable options include the number of people per group, the number of iterations to perform, and the number of groups to output:
+Other configurable options can be set at runtime, such as the path to an offline source CSV, the number of iterations to perform, and the ability to stop the search when the first valid lunch set is found.
 
 ```
 Usage: ruby lunch_roulette.rb [OPTIONS]
-  -n, --min-group-size N           Minimum Lunch Group Size (default 4)
-  -i, --iterations I               Number of Iterations (default 1,000)
-  -v, --verbose                    Verbose output
-  -d, --dont-write                 Don't write to files
-  -h, --help                       Print this help
+    -f, --file F                     Read data from provided CSV
+    -o, --offline                    Offline mode: read and write CSV data locally; default read location is data/people.csv
+    -i, --iterations I               Iterations, default 1000
+    -v, --valid                      Stop searching when the first valid set is encountered
+    -c, --concise                    Concise output: suppress stats and previous-lunches printouts
+    -h, --help                       Print this help
 ```
 
-A Dummy Staff
-==============
+## A Dummy Staff
 
-So that you can run Lunch Roulette out of the box, I've provided a dummy staff (thanks to Namey for the hilariously fake names) dataset in data/staff.csv
+So that you can run Lunch Roulette out of the box, I've provided a dummy staff (thanks to Fred Benenson for using Namey to create the hilariously fake names) dataset in data/people_sample.csv
 
 
-Configuring Lunch Roulete
-=========================
+## Configuring Lunch Roulete
 
-At the minimum, Lunch Roulette needs to know how different individual features are from each other. This is achieved by hardcoding a one dimensional mapping in `config/mappings_and_weights.yml`:
+At the minimum, Lunch Roulette needs to know how different individual features are from each other. This is achieved by hardcoding a one dimensional mapping in `config/config.yml`:
 
 ```
+iterations: 1_000
+min_group_size: 4
+
+max_manager_score: 1
+max_previous_lunches_score: 2
+
 team_mappings:
-  Community Support: 100
-  Community: 90
-  Marketing: 80
-  Communications: 70
-  Operations: 50
-  Product: 40
+  Engineering: 0
+  Data: 10
+  Product: 20
   Design: 30
-  Engineering: 20
-  Data: 0
-specialty_mappings:
-  Backend: 0
-  Data: 20
-  Frontend: 30
-  Mobile: 50
-  Finance: 100
-  Legal: 120
-weights:
-  table: 0.6
-  days_here: 0.2
-  team: 0.9
-  specialty: 0.1
-min_lunch_group_size: 4
+  Marketing: 40
+  Outreach: 50
+  Community Support: 60
+  Integrity: 70
+  Communications: 80
+  Operations: 90
+  Exec: 110
+
+tenure_weight: 0.2
+team_weight: 0.9
+manager_weight: 1.0
+colleague_weight: 1.0
+previous_lunches_weight: 2.5
+previous_lunches_half_life: 2
 ```
 
-Lunch Roulette expects all employees to have a team (Community, Design, etc.), and some employees to have a specialty (Data, Legal), etc.
+Lunch Roulette expects all employees to have a team (Community, Design, etc.) and a manager (the name of another teammate). It won't break if these are missing though.
 
-Gut Testing Lunch Roulette
-==========================
+## Using Google Sheets
 
-If specified, Lunch Roulette will output the top N results and/or the bottom N results. This is useful for testing its efficacy: if the bottom sets don't seem as great as the top sets, then you know its working! This will output 2 maximally varied sets, and two minimally varied sets:
+Lunch Roulette is designed to be a one-command affair, and to do so it leverages the [Google Sheets API](https://developers.google.com/sheets/api/guides/concepts) to download and update your people data direct from a Google Sheet. To set this up a few things have to be configured first with Google. [Follow their quickstart guide](https://developers.google.com/sheets/api/quickstart/ruby) for Ruby scripts to get yourself situated.
 
-```sh
-ruby lib/lunch_roulette.rb -v -m 2 -l 2 data/staff.csv
-```
+## Surveys
 
-If you wanted to get fancy, you could set up a double blind test of these results.
-
-CSV Output
-==========
-
-Unless instructed not to, Lunch Roulette will generate a new CSV in data/output each time it is run. The filenames are unique and based off MD5 hashes of the people in each group of the set. Lunch Roulette will also output a new staff CSV (prefixed staff_ in data/output) complete with new lunch IDs per-staff so that the next time it is run, it will avoid generating similar lunch groups. It is recommended that you overwrite data/staff.csv with whatever version you end up going with. If used with the verbose option, Lunch Roulette will dump a TSV list of staff with their new lunches so you can paste that back into Google Docs (pasting CSVs with commas doesn't seem to work).
-
-Learn More & Math
-=================
-Learn more about Lunch Roulette and the math behind it here:
-
-https://www.kickstarter.com/backing-and-hacking/lunch-roulette
-
+If you want to survey your coworkers to see who is lunchable, Lunch Roulette is equipped to use those responses to make its groups. Just make a Google Form with a yes or no question, and point Lunch Roulette to the spreadsheet of survey results. It will download those and link them to users by email address. 
