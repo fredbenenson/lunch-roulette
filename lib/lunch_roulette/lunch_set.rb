@@ -19,7 +19,7 @@ class LunchRoulette
     def self.generate_groups(set_id:, people:)
       group_count = people.length / MIN_GROUP_SIZE
       groups = []
-      people.shuffle.each_with_index do |person, i|
+      people.each_with_index do |person, i|
         group_index = i % group_count
         groups[group_index] = Array(groups[group_index]) << person
       end

@@ -29,6 +29,7 @@ class LunchRoulette
   FILE_DATE_FORMAT = Config.config[:file_date_format]
 
   LUNCHABLE_TRUE = Config.config[:lunchable_true]
+  SURVEY_TRUE = Config.config[:survey_true]
 
   ITERATIONS = Config.config[:iterations]
 
@@ -44,6 +45,8 @@ class LunchRoulette
       o.on('-f', '--file F', 'Read data from provided CSV') { |f| options[:file] = f.to_s }
       o.on('-o', '--offline', "Offline mode: read and write CSV data locally; default read location is #{PEOPLE_INPUT_FILE}") { options[:offline] = true }
       o.on('-i', '--iterations I', "Iterations, default #{ITERATIONS}") { |i| options[:iterations] = i.to_i }
+      o.on('-v', '--valid', "Stop searching when the first valid set is encountered") { options[:valid] = true }
+      o.on('-c', '--concise', "Concise output: suppress stats and previous-lunches printouts.") { |c| options[:concise_output] = true }
       o.on('-h', '--help', 'Print this help') { puts o; exit }
       o.parse!
     end
@@ -63,19 +66,18 @@ class LunchRoulette
       end
       puts "🍇  We have a winner! Set ##{lunch_set.id} is born, with #{lunch_set.groups.size} great groups"
 
-      puts "🐓  Plating palatable previous groups:\n#{lunch_set.inspect_previous_groups}"
-      puts "🌮  Sautéing savory scores:\n#{lunch_set.inspect_scores}"
+      puts "🐓  Plating palatable previous groups:\n#{lunch_set.inspect_previous_groups}" unless Config.options[:concise_output]
+      puts "🌮  Sautéing savory scores:\n#{lunch_set.inspect_scores}" unless Config.options[:concise_output]
       puts "🍕  Grilling gastronomical group emails:\n#{lunch_set.inspect_emails}"
 
       puts "🍦  Flash-freezing flavorful files:"
-      people_old_rows = people.sort_by(&:start_date).map(&:to_row)
-      people_rows = (lunch_set.people + unlunchable_people).sort_by(&:start_date).map(&:to_row)
-
       puts "Writing new people file to: #{PEOPLE_OUTPUT_FILE}"
+      people_rows = (lunch_set.people + unlunchable_people).sort_by(&:start_date).map(&:to_row)
       InputOutput.write_csv(PEOPLE_OUTPUT_FILE, people_rows)
 
       unless Config.options[:offline]
         puts "Updating previous people sheet at: #{SPREADSHEET_URL}"
+        people_old_rows = people.sort_by(&:start_date).map(&:to_row)
         SheetsClient.update(SPREADSHEET_ID, PEOPLE_OLD_RANGE, people_old_rows)
 
         puts "Updating new people sheet at: #{SPREADSHEET_URL}"
@@ -91,10 +93,12 @@ class LunchRoulette
   def spin(people, iterations)
     i = 0
     valid_sets = 0
-    winner = iterations.times.reduce(nil) do |leader|
-      new_set = LunchSet.generate(people)
+    iterations.times.reduce(nil) do |leader|
+      new_set = LunchSet.generate(people.shuffle)
       valid_sets += 1 if new_set.valid?
       print "#{valid_sets == 0 ? '🐄' : '🍔'}  Valid sets found: #{valid_sets}. Percent complete: #{((100.0 * (i += 1) / iterations)).round(4)}%\r"
+      
+      return new_set.tap{puts "\n"} if new_set.valid? && Config.options[:valid]
 
       [leader, new_set].compact.select(&:valid?).min_by(&:score)
     end.tap{puts "\n"}
@@ -115,8 +119,8 @@ class LunchRoulette
           start_date: DateTime.strptime(p['start_date'], PERSON_DATE_FORMAT),
           team: p['team'], 
           manager: p['manager'] && p['manager'].empty? ? nil : p['manager'], 
-          lunchable_default: p['lunchable_default'] == LUNCHABLE_TRUE,
-          lunches: String(p['lunches']).split(',').map{|s| Lunch.from_s(s)},
+          lunchable_default: p['lunchable_default'].downcase == LUNCHABLE_TRUE,
+          lunches: String(p['lunches']).split(',').map{|s| Lunch.from_s(s.strip)},
           survey: surveys.
             select(&:current?).
             select{|s| s.email == p['email']}.
@@ -135,10 +139,11 @@ class LunchRoulette
         puts "Downloading surveys sheet from: #{SPREADSHEET_URL}"
         SheetsClient.get(SPREADSHEET_ID, SURVEY_RANGE)
       end.map do |s|
+        next unless s.length == 3
         Survey.new(
-          email: s['email'], 
-          response: s['response'], 
-          date: DateTime.strptime(s['date'], SURVEY_DATE_FORMAT)
+          email: s.values[0],
+          lunchable: s.values[1].downcase == SURVEY_TRUE, 
+          date: DateTime.strptime(s.values[2], SURVEY_DATE_FORMAT)
         )
       end
   end

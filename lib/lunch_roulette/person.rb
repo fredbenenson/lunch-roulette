@@ -18,7 +18,7 @@ class LunchRoulette
     end
 
     def lunchable?
-      survey ? survey.lunchable? : lunchable_default
+      survey ? survey.lunchable : lunchable_default
     end
 
     def days_here

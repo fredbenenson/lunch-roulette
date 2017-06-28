@@ -12,17 +12,17 @@
   survey_date_format: '%m/%d/%Y %T'
   file_date_format: '%Y-%m-%d_%T'
 
-  lunchable_true: 'TRUE'
-  survey_yes: 'Yep'
+  lunchable_true: 'true'
+  survey_true: 'yep'
 
   survey_current_lag: 20
 
   iterations: 1_000
-  min_group_size: 4
+  min_group_size: 5
 
   max_group_score: 1000
   max_manager_score: 1
-  max_previous_lunches_score: 1
+  max_previous_lunches_score: 1.5
 
   team_mappings:
     Engineering: 0

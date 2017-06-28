@@ -15,7 +15,7 @@ class LunchRoulette
     end
 
     def self.from_s(str)
-      ids = str.strip.split('-')
+      ids = str.split('-')
       new(set_id: ids[0].to_i, group_id: ids[1].to_i)
     end
   end
