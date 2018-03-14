@@ -61,10 +61,11 @@ class LunchRoulette
     i = 0.0
     invalid_sets = 0
     if config.options[:verbose_output]
-      puts "Generating #{config.options[:iterations]} sets..."
+      puts "Generating #{iterations} sets."
     end
     iterations.times do
-      print "#{((i/iterations)*100).round(4)}% Done\r"
+      print "🎲 🍱 🍻 #{((i/iterations)*100).round(4)}% Done\r"
+
       i += 1
       l = LunchSet.new(@staff)
       if l.valid
@@ -75,7 +76,7 @@ class LunchRoulette
     end
 
     if config.options[:verbose_output]
-      puts "Invalid Sets: #{invalid_sets}"
+      puts "\nInvalid Sets: #{invalid_sets}"
       puts "Valid Sets: #{candidates.size}"
     end
 

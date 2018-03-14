@@ -24,7 +24,7 @@ class LunchRoulette
               o = "Group #{group_index + 1} of #{group.people.size} people: "
               o << group.inspect
               o << "\n\tEmails: #{group.emails}"
-              o << "\n\tSum Score: #{group.score.round(4)}"
+              o << "\n\tSum Score: #{group.score.round(10)}"
               o << "\n\tScore Breakdown:#{group.scores}"
               o << "\n\n"
               puts o if config.options[:verbose_output]

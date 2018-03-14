@@ -23,4 +23,4 @@
     specialty: 0.1
   min_lunch_group_size: 5
   min_group_score: 0.0001
-  time_decay_constant: 80.0
+  time_decay_constant: 5.0
